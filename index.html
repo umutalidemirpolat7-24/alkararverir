@@ -165,9 +165,9 @@
 </div>
 </section>
 <section class="hidden space-y-12 fade-enter" id="results-section">
-<div class="glass-panel rounded-xl p-10 relative overflow-hidden">
+<div class="glass-panel rounded-xl p-10 relative overflow-hidden border border-primary-container/10">
 <div class="absolute top-0 right-0 p-8">
-<div class="flex items-center gap-2 bg-primary-container/10 text-primary-container px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
+<div class="flex items-center gap-2 bg-primary-container/10 text-primary-container px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-primary-container/20">
 <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
 <span id="confidence-score">98% Güven Oranı</span>
 </div>
@@ -178,9 +178,12 @@
 <h2 class="text-9xl font-black tracking-[-0.06em]" id="verdict-text">AL</h2>
 </div>
 <div class="flex-1 pb-4">
-<p class="text-xl text-on-surface/80 leading-relaxed font-medium" id="verdict-description">
+<p class="text-xl text-on-surface/80 leading-relaxed font-medium mb-6" id="verdict-description">
                             "Bu ürün son 30 günün en düşük fiyat seviyesinde. Satıcı puanı ve kargo hızı verimlilik standartlarımızı karşılıyor."
                         </p>
+<div id="best-offer-cta">
+<!-- Primary CTA for the cheapest option -->
+</div>
 </div>
 </div>
 <div class="flex gap-4">
@@ -266,7 +269,6 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 showPreview(e.target.result);
-                // Auto-fill product if file name suggests something
                 const input = document.getElementById('product-input');
                 if (!input.value) input.value = "Yüklenen Görseldeki Ürün";
                 startAnalysis();
@@ -328,7 +330,6 @@
         let productName = userInput || "Tanımlanamayan Ürün";
         let minBase = 1000, maxBase = 5000;
         
-        // Find match in presets
         for (let key in productPresets) {
             if (productName.toLowerCase().includes(key)) {
                 minBase = productPresets[key].min;
@@ -338,7 +339,6 @@
             }
         }
 
-        // If user price exists, anchor base around it
         if (userPrice > 0) {
             minBase = userPrice * 0.85;
             maxBase = userPrice * 1.15;
@@ -348,11 +348,15 @@
         const prices = {
             'Hepsiburada.com': marketLow + Math.floor(Math.random() * 100),
             'Amazon.com.tr': marketLow + Math.floor(Math.random() * 300),
-            'Trendyol': marketLow - Math.floor(Math.random() * 50)
+            'Trendyol': marketLow - Math.floor(Math.random() * 50),
+            'N11': marketLow + Math.floor(Math.random() * 200),
+            'Pazarama': marketLow + Math.floor(Math.random() * 150),
+            'Çiçeksepeti': marketLow + Math.floor(Math.random() * 400)
         };
 
         const sorted = Object.entries(prices).sort((a, b) => a[1] - b[1]);
         const actualMarketLow = sorted[0][1];
+        const cheapestStore = sorted[0][0];
         
         let decision = 'AL';
         let color = 'text-primary-container';
@@ -372,7 +376,7 @@
             desc = `"${productName} için bu fiyat oldukça yüksek. Piyasada daha uygun seçenekler mevcut, bütçenizi koruyun."`;
         }
 
-        return { productName, sorted, decision, color, desc, actualMarketLow };
+        return { productName, sorted, decision, color, desc, actualMarketLow, cheapestStore };
     }
 
     function startAnalysis() {
@@ -400,41 +404,61 @@
         setTimeout(() => {
             const data = generateAnalysisData(userInput, userPrice);
             
-            // Update UI
             document.getElementById('verdict-text').innerText = data.decision;
             document.getElementById('verdict-text').className = `text-9xl font-black tracking-[-0.06em] ${data.color}`;
             document.getElementById('verdict-description').innerText = data.desc;
             
-            // AI Opinion
+            const bestOfferCta = document.getElementById('best-offer-cta');
+            if (data.decision === 'AL') {
+                bestOfferCta.innerHTML = `
+                    <a href="https://www.${data.cheapestStore.toLowerCase()}" target="_blank" class="w-full inline-flex items-center justify-between bg-primary-container text-on-primary-container px-6 py-4 rounded-xl font-black uppercase tracking-tight hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_40px_rgba(0,255,65,0.2)]">
+                        <div class="flex flex-col items-start">
+                            <span class="text-[10px] opacity-70">EN UCUZ BURADA</span>
+                            <span>${data.cheapestStore}'YA GİT</span>
+                        </div>
+                        <span class="material-symbols-outlined">open_in_new</span>
+                    </a>
+                `;
+            } else {
+                bestOfferCta.innerHTML = '';
+            }
+            
             const opinionHtml = `
-                <p>"${data.productName} analizimiz sonucunda, pazar verilerinin ${data.decision === 'AL' ? 'pozitif' : 'negatif'} bir eğilim gösterdiğini saptadık. ${data.sorted[0][0]} üzerindeki ${new Intl.NumberFormat('tr-TR').format(data.actualMarketLow)} TL'lik fiyat şu anki altın standarttır."</p>
+                <p>"${data.productName} analizimiz sonucunda, pazar verilerinin ${data.decision === 'AL' ? 'pozitif' : 'negatif'} bir eğilim gösterdiğini saptadık. ${data.cheapestStore} üzerindeki ${new Intl.NumberFormat('tr-TR').format(data.actualMarketLow)} TL'lik fiyat şu anki altın standarttır."</p>
                 <p>"Öneri: ${data.decision === 'ALMA' ? 'Fiyatların stabilize olmasını bekleyin ve kur dalgalanmalarını takip edin.' : 'Stok durumunu kontrol ederek satın alma işlemini tamamlayın.'}"</p>
             `;
             document.getElementById('ai-opinion').innerHTML = opinionHtml;
 
-            // Market List
             const marketList = document.getElementById('market-list');
             marketList.innerHTML = data.sorted.map(([name, price], idx) => `
-                <div class="flex items-center justify-between p-4 ${idx === 0 ? 'bg-surface-container-high' : 'bg-surface-container-high/50'} rounded-lg hover:bg-surface-bright transition-all cursor-pointer group">
+                <a href="https://www.${name.toLowerCase()}" target="_blank" class="flex items-center justify-between p-4 ${idx === 0 ? 'bg-primary-container/10 border border-primary-container/30' : 'bg-surface-container-high hover:bg-surface-bright'} rounded-lg transition-all group relative">
                     <div class="flex items-center gap-4">
-                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center font-bold">${name[0]}</div>
-                        <span class="font-bold">${name}</span>
+                        <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center font-black text-lg border border-white/10 group-hover:border-primary-container/50 transition-colors">${name[0]}</div>
+                        <div>
+                            <span class="font-bold block">${name}</span>
+                            <span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[12px]">verified</span> Güvenilir Mağaza
+                            </span>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <div class="font-black ${idx === 0 ? 'text-primary-container' : 'text-on-surface-variant'}">${new Intl.NumberFormat('tr-TR').format(price)} TL</div>
-                        <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">${idx === 0 ? 'En İyi Fiyat' : 'İkincil Seçenek'}</div>
+                    <div class="flex items-center gap-6">
+                        <div class="text-right">
+                            <div class="font-black ${idx === 0 ? 'text-primary-container text-xl' : 'text-on-surface text-lg'}">${new Intl.NumberFormat('tr-TR').format(price)} TL</div>
+                            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">${idx === 0 ? 'En İyi Fiyat' : 'İkincil Seçenek'}</div>
+                        </div>
+                        <div class="bg-surface-container-highest group-hover:bg-primary-container group-hover:text-on-primary-container p-2 rounded-full transition-all">
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </div>
                     </div>
-                </div>
+                </a>
             `).join('');
 
-            // Pulse Data
             document.getElementById('seller-score').innerHTML = `${(8 + Math.random() * 2).toFixed(1)}<span class="text-sm text-on-surface-variant font-medium">/10</span>`;
             document.getElementById('shipping-speed').innerHTML = `${Math.floor(12 + Math.random() * 36)}<span class="text-sm text-on-surface-variant font-medium"> Saat</span>`;
             const priceDrop = (Math.random() * 20).toFixed(0);
             document.getElementById('price-history').innerHTML = `-${priceDrop}% <span class="text-xs font-normal text-on-surface-variant">(30 GÜN)</span>`;
             document.getElementById('confidence-score').innerText = `${Math.floor(85 + Math.random() * 14)}% Güven Oranı`;
 
-            // Final Display
             spinner.classList.add('hidden');
             icon.classList.remove('hidden');
             text.innerText = "Yeniden Analiz Et";
