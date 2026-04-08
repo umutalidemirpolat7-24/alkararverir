@@ -102,6 +102,7 @@
       }
       @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
       [v-cloak] { display: none; }
+      .chart-bar { transition: height 1s ease-out; }
     </style>
 </head>
 <body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
@@ -137,6 +138,7 @@
                     </h1>
 <div class="relative group max-w-2xl mx-auto">
 <div class="bg-surface-container-lowest rounded-xl p-6 transition-all duration-300 focus-within:bg-surface-container-high focus-within:ring-2 focus-within:ring-outline-variant/12">
+<div class="flex flex-col gap-4">
 <div class="flex items-center gap-4">
 <!-- Photo Preview Chip -->
 <div class="hidden flex items-center bg-surface-container-high rounded-full pl-2 pr-4 py-1 gap-2 outline outline-1 outline-outline-variant/20 fade-in" id="photo-preview-chip">
@@ -145,10 +147,17 @@
 <button class="hover:text-error transition-colors" onclick="removePhoto()"><span class="material-symbols-outlined text-xs">close</span></button>
 </div>
 <input class="bg-transparent border-none focus:ring-0 w-full text-xl placeholder:text-on-surface-variant/40 text-on-surface font-medium" id="product-input" placeholder="Ürün adı veya link yapıştır..." type="text"/>
-<button class="bg-primary-container text-on-primary-container px-8 py-3 rounded-full font-bold tracking-tight hover:scale-105 transition-all active:scale-95 flex items-center gap-2" id="analyze-btn" onclick="startAnalysis()">
+</div>
+<div class="flex items-center gap-4 border-t border-outline-variant/10 pt-4">
+<div class="flex-grow relative">
+<span class="absolute left-0 top-1/2 -translate-y-1/2 text-on-surface-variant/60 font-bold ml-1">₺</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-xl pl-6 placeholder:text-on-surface-variant/40 text-on-surface font-bold" id="price-input" placeholder="Ürün Fiyatı (TL)" type="number"/>
+</div>
+<button class="bg-primary-container text-on-primary-container px-8 py-3 rounded-full font-bold tracking-tight hover:scale-105 transition-all active:scale-95 flex items-center gap-2 whitespace-nowrap" id="analyze-btn" onclick="startAnalysis()">
 <span id="btn-text">Analiz Et</span>
 <div class="hidden w-5 h-5 border-2 border-on-primary-container border-t-transparent rounded-full animate-spin" id="btn-spinner"></div>
 </button>
+</div>
 </div>
 </div>
 </div>
@@ -164,62 +173,110 @@
 </div>
 </section>
 <!-- Result State (The Core Verdict) -->
-<section class="hidden glass-card rounded-xl p-8 md:p-16 border border-outline-variant/10 relative overflow-hidden transition-all duration-700" id="result-section">
+<section class="hidden glass-card rounded-xl p-8 md:p-12 border border-outline-variant/10 relative overflow-hidden transition-all duration-700" id="result-section">
 <!-- Scanning Overlay -->
 <div class="absolute inset-0 bg-surface/90 flex flex-col items-center justify-center z-20 transition-opacity duration-300" id="scanning-overlay">
 <div class="relative w-24 h-24 mb-6">
 <div class="absolute inset-0 border-4 border-primary-container/20 rounded-xl"></div>
 <div class="scan-line"></div>
 </div>
-<p class="text-sm font-bold tracking-[0.2em] uppercase text-primary-container animate-pulse">Yapay Zeka Karar Mimarı analiz ediyor...</p>
+<div class="text-center space-y-2">
+<p class="text-sm font-bold tracking-[0.2em] uppercase text-primary-container animate-pulse" id="loading-status">Türkiye genelindeki fiyatlar taranıyor...</p>
+<p class="text-[10px] text-on-surface-variant/60 uppercase tracking-widest" id="loading-sub-status">Pazar yerleri analiz ediliyor...</p>
 </div>
-<div class="space-y-12 opacity-0" id="result-content">
-<div class="text-center space-y-6">
-<div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary-container text-on-primary-container shadow-[0_0_40px_rgba(0,230,57,0.2)]">
-<span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="space-y-10 opacity-0" id="result-content">
+<!-- Main Verdict Display -->
+<div class="text-center space-y-4">
+<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-container text-on-primary-container shadow-[0_0_40px_rgba(0,230,57,0.2)]" id="verdict-icon-container">
+<span class="material-symbols-outlined text-4xl" id="verdict-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
 </div>
 <div>
-<h2 class="text-8xl md:text-[10rem] font-black tracking-[-0.06em] leading-none text-primary-container">AL</h2>
-<p class="text-on-surface-variant text-lg mt-4 max-w-md mx-auto leading-relaxed" id="dynamic-verdict">
-                                Bu ürün şu an <span class="text-on-surface font-bold">piyasa ortalaması</span> altında ve <span class="text-on-surface font-bold">fiyat trendi</span> düşüşte.
+<h2 class="text-7xl md:text-9xl font-black tracking-[-0.06em] leading-none text-primary-container" id="verdict-text">AL</h2>
+<p class="text-on-surface-variant text-base mt-4 max-w-lg mx-auto leading-relaxed" id="dynamic-verdict">
+                                Girdiğiniz <span class="text-on-surface font-bold">1.250 TL</span> fiyat, piyasa ortalamasının çok altında.
                             </p>
 </div>
 </div>
-<!-- AI Insights Section -->
-<div class="grid md:grid-cols-2 gap-6 pt-6">
-<div class="bg-surface-container-high/50 p-6 rounded-2xl border border-outline-variant/10">
-<div class="flex items-center gap-3 mb-4">
-<span class="material-symbols-outlined text-primary-container">insights</span>
-<h4 class="font-bold tracking-tight text-sm uppercase">Piyasa Karşılaştırması</h4>
+<!-- Data Cards -->
+<div class="grid md:grid-cols-3 gap-4">
+<div class="bg-surface-container-high/40 p-5 rounded-2xl border border-outline-variant/10 flex flex-col justify-center">
+<p class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant/60 mb-1">Piyasadaki En Düşük</p>
+<p class="text-2xl font-black text-on-surface" id="min-price-display">₺1.199</p>
+<p class="text-[10px] text-primary-container font-bold mt-1">Amazon.com.tr'de</p>
 </div>
-<p class="text-on-surface-variant text-sm leading-relaxed">
-            Bu ürün şu anki fiyatıyla piyasa ortalamasından <span class="text-primary-container font-bold">%18 daha ucuz</span>. Son 3 ayın en düşük ikinci fiyat seviyesinde.
-        </p>
+<div class="bg-surface-container-high/40 p-5 rounded-2xl border border-outline-variant/10 flex flex-col justify-center">
+<p class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant/60 mb-1">Piyasa Ortalaması</p>
+<p class="text-2xl font-black text-on-surface" id="avg-price-display">₺1.450</p>
+<p class="text-[10px] text-on-surface-variant font-medium mt-1">Son 30 günlük veri</p>
 </div>
-<div class="bg-surface-container-high/50 p-6 rounded-2xl border border-outline-variant/10">
-<div class="flex items-center gap-3 mb-4">
-<span class="material-symbols-outlined text-primary-container">psychology</span>
-<h4 class="font-bold tracking-tight text-sm uppercase">Yapay Zeka Önerisi</h4>
-</div>
-<p class="text-on-surface-variant text-sm leading-relaxed">
-            Stok durumları kritik seviyede. Gelecek hafta beklenen genel zamdan önce <span class="text-on-surface font-bold">hemen almanız</span> tavsiye edilir. Flaş indirim ihtimali düşük.
-        </p>
+<div class="bg-surface-container-high/40 p-5 rounded-2xl border border-outline-variant/10 flex flex-col justify-center">
+<p class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant/60 mb-1">Fiyat Avantajı</p>
+<p class="text-2xl font-black text-primary-container" id="advantage-display">%16 Karlı</p>
+<p class="text-[10px] text-on-surface-variant font-medium mt-1">Ortalamaya göre</p>
 </div>
 </div>
-<div class="pt-8 flex flex-col items-center gap-6">
+<!-- Visual Analysis Row -->
+<div class="grid md:grid-cols-2 gap-6">
+<!-- Price Trend Placeholder -->
+<div class="bg-surface-container-low/60 p-6 rounded-2xl border border-outline-variant/10">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-bold tracking-tight text-xs uppercase flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary-container">trending_down</span>
+                                    Fiyat Analiz Grafiği
+                                </h4>
+<span class="text-[10px] text-on-surface-variant/60 font-bold uppercase tracking-tighter">Son 6 Ay</span>
+</div>
+<div class="h-32 flex items-end gap-2 px-2">
+<div class="flex-grow bg-primary-container/20 rounded-t-lg chart-bar h-[80%] hover:bg-primary-container/40 transition-colors"></div>
+<div class="flex-grow bg-primary-container/20 rounded-t-lg chart-bar h-[95%] hover:bg-primary-container/40 transition-colors"></div>
+<div class="flex-grow bg-primary-container/20 rounded-t-lg chart-bar h-[70%] hover:bg-primary-container/40 transition-colors"></div>
+<div class="flex-grow bg-primary-container/20 rounded-t-lg chart-bar h-[60%] hover:bg-primary-container/40 transition-colors"></div>
+<div class="flex-grow bg-primary-container/20 rounded-t-lg chart-bar h-[45%] hover:bg-primary-container/40 transition-colors"></div>
+<div class="flex-grow bg-primary-container rounded-t-lg chart-bar h-[35%] shadow-[0_0_15px_rgba(0,255,65,0.3)]"></div>
+</div>
+<div class="flex justify-between mt-2 px-2 text-[8px] font-bold text-on-surface-variant/40 uppercase tracking-widest">
+<span>Oca</span>
+<span>Şub</span>
+<span>Mar</span>
+<span>Nis</span>
+<span>May</span>
+<span>Haz</span>
+</div>
+</div>
+<!-- Store Specifics & AI Insights -->
+<div class="bg-surface-container-low/60 p-6 rounded-2xl border border-outline-variant/10 flex flex-col justify-between">
+<div>
+<h4 class="font-bold tracking-tight text-xs uppercase flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-sm text-primary-container">psychology</span>
+                                    AI Analiz Raporu
+                                </h4>
+<p class="text-on-surface-variant text-sm leading-relaxed" id="ai-insight-text">
+                                    Ürün şu an <span class="text-on-surface font-bold">Hepsiburada'da 200 TL daha ucuz</span>. Trend verilerine göre önümüzdeki 2 hafta içinde %5 artış bekleniyor.
+                                </p>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/10">
+<div class="flex items-center gap-2 text-[10px] text-primary-container font-bold">
+<span class="material-symbols-outlined text-xs">verified</span>
+                                    GÜVEN SKORU: %94
+                                </div>
+</div>
+</div>
+</div>
+<div class="pt-4 flex flex-col items-center gap-6">
 <button class="flex items-center gap-2 px-10 py-4 bg-primary-container text-on-primary-container rounded-full font-black tracking-tighter hover:shadow-lg transition-all active:scale-95 group">
 <span class="material-symbols-outlined">share</span>
-                                BU ANALİZİ PAYLAŞ
+                                ANALİZİ PAYLAŞ
                             </button>
 <div class="flex gap-4">
 <button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-bright transition-colors">
-<span class="material-symbols-outlined text-sm">public</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant">public</span>
 </button>
 <button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-bright transition-colors">
-<span class="material-symbols-outlined text-sm">chat_bubble</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant">chat_bubble</span>
 </button>
 <button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-bright transition-colors">
-<span class="material-symbols-outlined text-sm">alternate_email</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant">alternate_email</span>
 </button>
 </div>
 </div>
@@ -317,8 +374,11 @@
     }
 
     function startAnalysis() {
-        const input = document.getElementById('product-input').value;
-        if(!input) return alert('Lütfen bir ürün adı girin veya fotoğraf yükleyin.');
+        const productInput = document.getElementById('product-input').value;
+        const priceInput = document.getElementById('price-input').value;
+        
+        if(!productInput) return alert('Lütfen bir ürün adı girin veya fotoğraf yükleyin.');
+        if(!priceInput) return alert('Lütfen ürün fiyatını girin.');
 
         const btnText = document.getElementById('btn-text');
         const btnSpinner = document.getElementById('btn-spinner');
@@ -327,6 +387,8 @@
         const retryAction = document.getElementById('retry-action');
         const scanningOverlay = document.getElementById('scanning-overlay');
         const resultContent = document.getElementById('result-content');
+        const loadingStatus = document.getElementById('loading-status');
+        const loadingSubStatus = document.getElementById('loading-sub-status');
 
         // Step 1: Button Loading State
         btnText.classList.add('opacity-0');
@@ -342,18 +404,70 @@
                 resultSection.classList.add('fade-in');
                 retryAction.classList.remove('hidden');
                 
-                // Step 3: Show "Scanning" Animation
+                // Step 3: Progressive Scanning Animation
                 setTimeout(() => {
+                    loadingStatus.innerText = "Pazar yerleri analiz ediliyor...";
+                    loadingSubStatus.innerText = "Trendyol, Hepsiburada, Amazon.com.tr kontrol ediliyor...";
+                }, 1000);
+
+                setTimeout(() => {
+                    loadingStatus.innerText = "Veri mimarisi kuruluyor...";
+                    loadingSubStatus.innerText = "Piyasa ortalaması hesaplanıyor...";
+                }, 2000);
+
+                setTimeout(() => {
+                    // Update content based on price
+                    const price = parseFloat(priceInput);
+                    const avg = price * (0.8 + Math.random() * 0.4); // Simulate market data
+                    const min = avg * 0.9;
+                    const diff = ((avg - price) / avg) * 100;
+                    
+                    updateResultUI(price, avg, min, diff);
+
                     scanningOverlay.classList.add('opacity-0');
                     setTimeout(() => {
                         scanningOverlay.classList.add('hidden');
-                        // Step 4: Show Final Dynamic Result
                         resultContent.classList.remove('opacity-0');
                         resultContent.classList.add('fade-in');
                     }, 300);
-                }, 2000); // 2 second "AI thinking" time
+                }, 3500);
             }, 500);
         }, 800);
+    }
+
+    function updateResultUI(userPrice, marketAvg, minPrice, diffPercent) {
+        const verdictText = document.getElementById('verdict-text');
+        const verdictDesc = document.getElementById('dynamic-verdict');
+        const verdictIconContainer = document.getElementById('verdict-icon-container');
+        const verdictIcon = document.getElementById('verdict-icon');
+        const aiInsightText = document.getElementById('ai-insight-text');
+        
+        document.getElementById('min-price-display').innerText = `₺${Math.round(minPrice).toLocaleString('tr-TR')}`;
+        document.getElementById('avg-price-display').innerText = `₺${Math.round(marketAvg).toLocaleString('tr-TR')}`;
+        document.getElementById('advantage-display').innerText = `${diffPercent > 0 ? '%' + Math.round(diffPercent) + ' Karlı' : '%' + Math.abs(Math.round(diffPercent)) + ' Zarar'}`;
+
+        if (userPrice < minPrice) {
+            verdictText.innerText = "AL";
+            verdictText.className = "text-7xl md:text-9xl font-black tracking-[-0.06em] leading-none text-primary-container";
+            verdictIconContainer.className = "inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-container text-on-primary-container shadow-[0_0_40px_rgba(0,230,57,0.2)]";
+            verdictIcon.innerText = "check_circle";
+            verdictDesc.innerHTML = `Girdiğiniz <span class="text-on-surface font-bold">${userPrice.toLocaleString('tr-TR')} TL</span> fiyat, piyasadaki en düşük fiyatın bile altında! <span class="text-primary-container font-bold">Kaçırmayın.</span>`;
+            aiInsightText.innerHTML = `Analizlerimize göre bu fiyat son 12 ayın <span class="text-on-surface font-bold">en düşük seviyesinde</span>. Amazon.com.tr fiyatından ₺${Math.round(minPrice - userPrice)} daha uygun.`;
+        } else if (userPrice < marketAvg) {
+            verdictText.innerText = "AL";
+            verdictText.className = "text-7xl md:text-9xl font-black tracking-[-0.06em] leading-none text-primary-container";
+            verdictIconContainer.className = "inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-container text-on-primary-container shadow-[0_0_40px_rgba(0,230,57,0.2)]";
+            verdictIcon.innerText = "trending_down";
+            verdictDesc.innerHTML = `Girdiğiniz fiyat piyasa ortalamasından <span class="text-on-surface font-bold">%${Math.round(diffPercent)}</span> daha ucuz. Mantıklı bir alım.`;
+            aiInsightText.innerHTML = `Ürün şu an <span class="text-on-surface font-bold">Pazarama</span> fiyatına yakın. Stokların azaldığı gözlemlendi, zam gelmeden alınabilir.`;
+        } else {
+            verdictText.innerText = "BEKLE";
+            verdictText.className = "text-7xl md:text-9xl font-black tracking-[-0.06em] leading-none text-tertiary-container";
+            verdictIconContainer.className = "inline-flex items-center justify-center w-20 h-20 rounded-full bg-tertiary-container text-on-tertiary-container shadow-[0_0_40px_rgba(255,217,107,0.2)]";
+            verdictIcon.innerText = "schedule";
+            verdictDesc.innerHTML = `Girdiğiniz fiyat piyasa ortalamasından <span class="text-on-surface font-bold">₺${Math.round(userPrice - marketAvg)}</span> daha pahalı. Acele etmeyin.`;
+            aiInsightText.innerHTML = `<span class="text-on-surface font-bold">Hepsiburada</span>'da aynı ürün ₺${Math.round(minPrice)} fiyatla mevcut. Kampanya dönemini beklemeniz %15 tasarruf sağlayabilir.`;
+        }
     }
 
     function resetUI() {
@@ -365,8 +479,12 @@
         const scanningOverlay = document.getElementById('scanning-overlay');
         const resultContent = document.getElementById('result-content');
         const input = document.getElementById('product-input');
+        const priceInput = document.getElementById('price-input');
+        const loadingStatus = document.getElementById('loading-status');
+        const loadingSubStatus = document.getElementById('loading-sub-status');
 
         input.value = "";
+        priceInput.value = "";
         removePhoto();
         
         btnText.classList.remove('opacity-0');
@@ -375,6 +493,9 @@
         resultSection.classList.add('hidden');
         retryAction.classList.add('hidden');
         scanningOverlay.classList.remove('hidden', 'opacity-0');
+        loadingStatus.innerText = "Türkiye genelindeki fiyatlar taranıyor...";
+        loadingSubStatus.innerText = "Pazar yerleri analiz ediliyor...";
+        
         resultContent.classList.add('opacity-0');
         resultContent.classList.remove('fade-in');
         
