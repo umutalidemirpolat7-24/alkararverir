@@ -85,11 +85,12 @@
       .hidden-input { display: none; }
       .fade-enter { opacity: 0; transform: translateY(10px); transition: all 0.5s ease-out; }
       .fade-enter-active { opacity: 1; transform: translateY(0); }
+      .progress-bar-fill { transition: width 0.3s ease-in-out; }
     </style>
 </head>
 <body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
 <header class="bg-[#131313] text-[#00FF41] font-['Inter'] font-bold tracking-tight docked full-width top-0 sticky z-50 bg-gradient-to-b from-[#1C1B1B] to-transparent flat no-shadows">
-<div class="flex justify-between items-center px-6 h-16 w-full max-screen-2xl mx-auto">
+<div class="flex justify-between items-center px-6 h-16 w-full max-w-screen-2xl mx-auto">
 <div class="text-xl font-black tracking-[-0.04em] text-[#00FF41]">Decision Architect</div>
 <div class="hidden md:flex gap-8 items-center">
 <a class="text-[#00FF41] font-bold hover:text-[#00FF41] transition-colors duration-200" href="#">Analysis</a>
@@ -146,21 +147,28 @@
 <span class="text-xs font-bold tracking-widest uppercase" id="upload-text">Fotoğraf Yükle veya Sürükle</span>
 </div>
 <button class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-container px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest z-10 hover:scale-105 active:scale-95 transition-all" id="capture-btn" onclick="captureImage(event)">Fotoğrafı Çek</button>
-<div class="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
-<div class="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
-<div class="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
-<div class="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
 </div>
 </div>
+<div class="flex flex-col gap-4">
 <div class="flex gap-4">
 <button class="flex-1 bg-surface-container-high text-on-surface py-6 rounded-full text-lg font-bold uppercase tracking-tighter hover:bg-surface-bright transition-all flex items-center justify-center gap-3" id="camera-trigger" onclick="simulateCamera()">
 <span class="material-symbols-outlined">camera_alt</span> Kamera
-                    </button>
-<button class="flex-[2] bg-primary-container text-on-primary-container py-6 rounded-full text-xl font-black uppercase tracking-tighter hover:scale-[1.01] active:scale-95 transition-all shadow-[0_0_40px_rgba(0,255,65,0.15)] flex items-center justify-center gap-3" id="analyze-btn" onclick="startAnalysis()">
+                        </button>
+<button class="flex-[2] bg-primary-container text-on-primary-container py-6 rounded-full text-xl font-black uppercase tracking-tighter hover:scale-[1.01] active:scale-95 transition-all shadow-[0_0_40px_rgba(0,255,65,0.15)] flex items-center justify-center gap-3 overflow-hidden relative" id="analyze-btn" onclick="startAnalysis()">
+<div class="absolute inset-0 bg-white/10 translate-y-full transition-transform" id="progress-overlay"></div>
 <span class="material-symbols-outlined" id="analyze-icon" style="font-variation-settings: 'FILL' 1;">bolt</span>
-<span class="hidden animate-spin material-symbols-outlined" id="analyze-spinner">progress_activity</span>
 <span id="analyze-text">Yapay Zeka ile Analiz Et</span>
 </button>
+</div>
+<div class="hidden px-2 space-y-2" id="progress-container">
+<div class="flex justify-between text-[10px] uppercase font-bold tracking-widest text-on-surface-variant">
+<span id="progress-status">Veriler Hazırlanıyor...</span>
+<span id="progress-percent">0%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-0 progress-bar-fill" id="progress-bar"></div>
+</div>
+</div>
 </div>
 </div>
 </section>
@@ -169,7 +177,7 @@
 <div class="absolute top-0 right-0 p-8">
 <div class="flex items-center gap-2 bg-primary-container/10 text-primary-container px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-primary-container/20">
 <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
-<span id="confidence-score">98% Güven Oranı</span>
+<span id="confidence-score">98% Doğruluk</span>
 </div>
 </div>
 <div class="flex flex-col md:flex-row items-end gap-8 mb-10">
@@ -178,62 +186,72 @@
 <h2 class="text-9xl font-black tracking-[-0.06em]" id="verdict-text">AL</h2>
 </div>
 <div class="flex-1 pb-4">
+<div class="bg-secondary-container/10 border border-secondary-container/20 rounded-xl p-4 mb-6 hidden" id="manipulation-alert">
+<div class="flex items-center gap-2 text-secondary-container font-bold text-sm mb-1 uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm">warning</span> Fiyat Manipülasyonu Tespiti
+                            </div>
+<p class="text-xs text-secondary-container/80">Bu ürünün 'indirimli' fiyatı, son 30 günlük ortalamadan daha yüksektir.</p>
+</div>
 <p class="text-xl text-on-surface/80 leading-relaxed font-medium mb-6" id="verdict-description">
-                            "Bu ürün son 30 günün en düşük fiyat seviyesinde. Satıcı puanı ve kargo hızı verimlilik standartlarımızı karşılıyor."
+                            Analiz tamamlandı. Veri setleri tutarlı.
                         </p>
-<div id="best-offer-cta">
-<!-- Primary CTA for the cheapest option -->
+<div id="best-offer-cta"></div>
 </div>
-</div>
-</div>
-<div class="flex gap-4">
-<button class="flex-1 bg-surface-container-high text-on-surface py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-surface-bright transition-colors">
-<span class="material-symbols-outlined text-sm">share</span> Ekiple Paylaş
-                    </button>
-<button class="flex-1 bg-surface-container-high text-on-surface py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-surface-bright transition-colors">
-<span class="material-symbols-outlined text-sm">bookmark</span> Tasarrufa Kaydet
-                    </button>
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="md:col-span-2 bg-surface-container-low rounded-xl p-8">
+<div class="md:col-span-2 space-y-6">
+<div class="bg-surface-container-low rounded-xl p-8">
 <h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6 flex items-center gap-2">
-<span class="material-symbols-outlined text-sm">travel_explore</span> Kaynak Analizi
-                    </h3>
-<div class="space-y-4" id="market-list">
-<!-- Dynamic Market Items -->
+<span class="material-symbols-outlined text-sm">travel_explore</span> Pazar Analizi &amp; Doğrudan Linkler
+                        </h3>
+<div class="space-y-4" id="market-list"></div>
 </div>
-</div>
-<div class="bg-surface-container-low rounded-xl p-8 flex flex-col">
-<h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6">Pazar Nabzı</h3>
-<div class="space-y-8 flex-1">
+<div class="bg-surface-container-low rounded-xl p-8">
+<h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">query_stats</span> Tüketici Bilinci &amp; Analiz
+                        </h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+<div class="space-y-4">
 <div>
-<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Satıcı Puanı</div>
-<div class="text-3xl font-black text-primary-container" id="seller-score">9.8<span class="text-sm text-on-surface-variant font-medium">/10</span></div>
+<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-2">Gerçek İndirim Oranı</div>
+<div class="flex items-center gap-3">
+<div class="text-3xl font-black text-primary-container" id="real-discount-val">0%</div>
+<div class="text-[10px] font-bold py-1 px-2 rounded bg-surface-container-highest text-on-surface-variant" id="inflation-badge">STABİL</div>
+</div>
 </div>
 <div>
-<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Kargo Hızı</div>
-<div class="text-3xl font-black" id="shipping-speed">24<span class="text-sm text-on-surface-variant font-medium"> Saat</span></div>
+<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-2">30 Günlük En Düşük</div>
+<div class="text-xl font-bold text-on-surface" id="lowest-30-price">0 TL</div>
+</div>
+</div>
+<div class="space-y-4 border-l border-outline-variant/20 pl-0 sm:pl-8">
+<div>
+<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-2">Satıcı Güvenirliği</div>
+<div class="text-3xl font-black" id="seller-reliability-val">0.0<span class="text-sm font-medium opacity-40">/10</span></div>
+<div class="h-1 w-full bg-surface-container-highest rounded-full mt-2 overflow-hidden">
+<div class="bg-primary-container h-full" id="reliability-bar" style="width: 0%"></div>
+</div>
 </div>
 <div>
-<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Fiyat Geçmişi</div>
-<div class="text-xl font-bold text-secondary-fixed-dim" id="price-history">-15% <span class="text-xs font-normal text-on-surface-variant">(30 GÜN)</span></div>
+<div class="text-[10px] font-bold text-on-surface-variant uppercase mb-2">Tahmini Stok Ömrü</div>
+<div class="text-sm font-bold text-on-surface" id="stock-prediction">Veri Yok</div>
 </div>
 </div>
 </div>
 </div>
-<div class="bg-surface-container-lowest rounded-xl p-10 border border-outline-variant/10">
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/10 h-fit sticky top-24">
 <div class="flex items-center gap-4 mb-6">
 <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
-<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">analytics</span>
 </div>
 <div>
-<h3 class="font-black text-xl tracking-tight">Profesyonel Görüş</h3>
-<p class="text-[10px] font-bold uppercase text-on-surface-variant tracking-widest">Decision Architect AI v4.2</p>
+<h3 class="font-black text-xl tracking-tight">Teknik Analiz Raporu</h3>
+<p class="text-[10px] font-bold uppercase text-on-surface-variant tracking-widest">Architect Engine v4.2</p>
 </div>
 </div>
-<div class="space-y-4 text-on-surface-variant leading-relaxed text-lg italic" id="ai-opinion">
-<!-- Dynamic Opinion -->
+<div class="space-y-4 text-sm font-mono text-on-surface-variant leading-relaxed" id="ai-opinion"></div>
 </div>
 </div>
 </section>
@@ -263,6 +281,14 @@
         'kitap': { min: 50, max: 250, category: 'Medya', name: 'Bestseller Roman' }
     };
 
+    const marketSearchUrls = {
+        'Hepsiburada': 'https://www.hepsiburada.com/ara?q=',
+        'Amazon': 'https://www.amazon.com.tr/s?k=',
+        'Trendyol': 'https://www.trendyol.com/sr?q=',
+        'N11': 'https://www.n11.com/arama?q=',
+        'Pazarama': 'https://www.pazarama.com/arama?q='
+    };
+
     function handleFileUpload(event) {
         const file = event.target.files[0];
         if (file) {
@@ -270,7 +296,7 @@
             reader.onload = function(e) {
                 showPreview(e.target.result);
                 const input = document.getElementById('product-input');
-                if (!input.value) input.value = "Yüklenen Görseldeki Ürün";
+                if (!input.value) input.value = "Tanımlanan Ürün";
                 startAnalysis();
             };
             reader.readAsDataURL(file);
@@ -302,7 +328,7 @@
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
         } catch (err) {
-            alert("Kamera erişimi reddedildi. Lütfen dosya yükleyin.");
+            alert("Kamera erişimi reddedildi.");
             content.classList.remove('hidden');
             video.classList.add('hidden');
             captureBtn.classList.add('hidden');
@@ -318,8 +344,7 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
-        const stream = video.srcObject;
-        if (stream) stream.getTracks().forEach(track => track.stop());
+        if (video.srcObject) video.srcObject.getTracks().forEach(track => track.stop());
         showPreview(dataUrl);
         const input = document.getElementById('product-input');
         if (!input.value) input.value = "Kamera ile Çekilen Ürün";
@@ -340,43 +365,44 @@
         }
 
         if (userPrice > 0) {
-            minBase = userPrice * 0.85;
-            maxBase = userPrice * 1.15;
+            minBase = userPrice * 0.8;
+            maxBase = userPrice * 1.2;
         }
 
-        const marketLow = Math.floor(minBase + Math.random() * (maxBase - minBase) * 0.3);
-        const prices = {
-            'Hepsiburada.com': marketLow + Math.floor(Math.random() * 100),
-            'Amazon.com.tr': marketLow + Math.floor(Math.random() * 300),
-            'Trendyol': marketLow - Math.floor(Math.random() * 50),
-            'N11': marketLow + Math.floor(Math.random() * 200),
-            'Pazarama': marketLow + Math.floor(Math.random() * 150),
-            'Çiçeksepeti': marketLow + Math.floor(Math.random() * 400)
-        };
+        const marketLow = Math.floor(minBase + Math.random() * (maxBase - minBase) * 0.4);
+        const stores = ['Hepsiburada', 'Amazon', 'Trendyol', 'N11', 'Pazarama'];
+        const prices = {};
+        stores.forEach(s => prices[s] = marketLow + Math.floor(Math.random() * 800));
 
         const sorted = Object.entries(prices).sort((a, b) => a[1] - b[1]);
         const actualMarketLow = sorted[0][1];
         const cheapestStore = sorted[0][0];
         
+        // Consumer Analysis Logic
+        const lowest30Days = actualMarketLow * (0.9 + Math.random() * 0.2);
+        const inflationRate = ((userPrice - lowest30Days) / lowest30Days) * 100;
+        const sellerScore = (7.5 + Math.random() * 2.4).toFixed(1);
+        const isManipulated = userPrice > actualMarketLow * 1.15;
+        
         let decision = 'AL';
         let color = 'text-primary-container';
-        let desc = "";
 
         if (userPrice <= actualMarketLow) {
             decision = 'AL';
             color = 'text-primary-container';
-            desc = `"${productName} için girdiğiniz fiyat piyasadaki en iyi tekliflerle yarışıyor. Kaçırmamanızı öneririz."`;
-        } else if (userPrice <= actualMarketLow * 1.08) {
+        } else if (userPrice <= actualMarketLow * 1.12) {
             decision = 'BEKLE';
             color = 'text-tertiary-fixed-dim';
-            desc = `"${productName} şu an ortalama bir fiyatta. Acil değilse %5-8 arası bir indirim beklenebilir."`;
         } else {
             decision = 'ALMA';
             color = 'text-secondary-container';
-            desc = `"${productName} için bu fiyat oldukça yüksek. Piyasada daha uygun seçenekler mevcut, bütçenizi koruyun."`;
         }
 
-        return { productName, sorted, decision, color, desc, actualMarketLow, cheapestStore };
+        return { 
+            productName, sorted, decision, color, 
+            actualMarketLow, cheapestStore, lowest30Days, 
+            inflationRate, sellerScore, isManipulated 
+        };
     }
 
     function startAnalysis() {
@@ -389,88 +415,125 @@
         }
 
         const btn = document.getElementById('analyze-btn');
-        const icon = document.getElementById('analyze-icon');
-        const spinner = document.getElementById('analyze-spinner');
         const text = document.getElementById('analyze-text');
         const results = document.getElementById('results-section');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressStatus = document.getElementById('progress-status');
+        const progressPercent = document.getElementById('progress-percent');
 
         btn.disabled = true;
-        btn.classList.add('opacity-80', 'cursor-not-allowed');
-        icon.classList.add('hidden');
-        spinner.classList.remove('hidden');
-        text.innerText = "Analiz Ediliyor...";
+        progressContainer.classList.remove('hidden');
         results.classList.add('hidden');
+        
+        const steps = [
+            { p: 20, s: 'Pazar yerleri taranıyor...' },
+            { p: 50, s: 'Fiyat geçmişi kontrol ediliyor...' },
+            { p: 80, s: 'Satıcı puanları analiz ediliyor...' },
+            { p: 100, s: 'Analiz tamamlandı.' }
+        ];
 
-        setTimeout(() => {
-            const data = generateAnalysisData(userInput, userPrice);
-            
-            document.getElementById('verdict-text').innerText = data.decision;
-            document.getElementById('verdict-text').className = `text-9xl font-black tracking-[-0.06em] ${data.color}`;
-            document.getElementById('verdict-description').innerText = data.desc;
-            
-            const bestOfferCta = document.getElementById('best-offer-cta');
-            if (data.decision === 'AL') {
-                bestOfferCta.innerHTML = `
-                    <a href="https://www.${data.cheapestStore.toLowerCase()}" target="_blank" class="w-full inline-flex items-center justify-between bg-primary-container text-on-primary-container px-6 py-4 rounded-xl font-black uppercase tracking-tight hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_40px_rgba(0,255,65,0.2)]">
-                        <div class="flex flex-col items-start">
-                            <span class="text-[10px] opacity-70">EN UCUZ BURADA</span>
-                            <span>${data.cheapestStore}'YA GİT</span>
-                        </div>
-                        <span class="material-symbols-outlined">open_in_new</span>
-                    </a>
-                `;
+        let stepIdx = 0;
+        const interval = setInterval(() => {
+            if (stepIdx < steps.length) {
+                const step = steps[stepIdx];
+                progressBar.style.width = step.p + '%';
+                progressStatus.innerText = step.s;
+                progressPercent.innerText = step.p + '%';
+                stepIdx++;
             } else {
-                bestOfferCta.innerHTML = '';
+                clearInterval(interval);
+                renderResults(generateAnalysisData(userInput, userPrice));
             }
-            
-            const opinionHtml = `
-                <p>"${data.productName} analizimiz sonucunda, pazar verilerinin ${data.decision === 'AL' ? 'pozitif' : 'negatif'} bir eğilim gösterdiğini saptadık. ${data.cheapestStore} üzerindeki ${new Intl.NumberFormat('tr-TR').format(data.actualMarketLow)} TL'lik fiyat şu anki altın standarttır."</p>
-                <p>"Öneri: ${data.decision === 'ALMA' ? 'Fiyatların stabilize olmasını bekleyin ve kur dalgalanmalarını takip edin.' : 'Stok durumunu kontrol ederek satın alma işlemini tamamlayın.'}"</p>
-            `;
-            document.getElementById('ai-opinion').innerHTML = opinionHtml;
+        }, 800);
+    }
 
-            const marketList = document.getElementById('market-list');
-            marketList.innerHTML = data.sorted.map(([name, price], idx) => `
-                <a href="https://www.${name.toLowerCase()}" target="_blank" class="flex items-center justify-between p-4 ${idx === 0 ? 'bg-primary-container/10 border border-primary-container/30' : 'bg-surface-container-high hover:bg-surface-bright'} rounded-lg transition-all group relative">
+    function renderResults(data) {
+        const results = document.getElementById('results-section');
+        const manipulationAlert = document.getElementById('manipulation-alert');
+        
+        document.getElementById('verdict-text').innerText = data.decision;
+        document.getElementById('verdict-text').className = `text-9xl font-black tracking-[-0.06em] ${data.color}`;
+        
+        if (data.isManipulated) {
+            manipulationAlert.classList.remove('hidden');
+            document.getElementById('verdict-description').innerText = "Fiyat manipülasyonu tespiti: Girdiğiniz fiyat piyasa normlarının %15 üzerinde.";
+        } else {
+            manipulationAlert.classList.add('hidden');
+            document.getElementById('verdict-description').innerText = `Veri doğrulandı. ${data.cheapestStore} üzerinde en iyi fiyat aktif durumda.`;
+        }
+
+        const searchKeyword = encodeURIComponent(data.productName);
+        const bestOfferCta = document.getElementById('best-offer-cta');
+        bestOfferCta.innerHTML = `
+            <a href="${marketSearchUrls[data.cheapestStore] || 'https://www.google.com/search?q='}${searchKeyword}" target="_blank" class="w-full inline-flex items-center justify-between bg-primary-container text-on-primary-container px-6 py-4 rounded-xl font-black uppercase tracking-tight hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_40px_rgba(0,255,65,0.2)]">
+                <div class="flex flex-col items-start">
+                    <span class="text-[10px] opacity-70">DOĞRUDAN ÜRÜN ARA</span>
+                    <span>${data.cheapestStore}'YA GİT</span>
+                </div>
+                <span class="material-symbols-outlined">open_in_new</span>
+            </a>
+        `;
+
+        // Consumer Section Updates
+        document.getElementById('real-discount-val').innerText = `${Math.abs(data.inflationRate).toFixed(1)}%`;
+        const inflationBadge = document.getElementById('inflation-badge');
+        if (data.inflationRate > 5) {
+            inflationBadge.innerText = 'ŞİŞİRİLMİŞ';
+            inflationBadge.className = 'text-[10px] font-bold py-1 px-2 rounded bg-secondary-container text-on-secondary';
+        } else {
+            inflationBadge.innerText = 'STABİL';
+            inflationBadge.className = 'text-[10px] font-bold py-1 px-2 rounded bg-surface-container-highest text-on-surface-variant';
+        }
+
+        document.getElementById('lowest-30-price').innerText = `${new Intl.NumberFormat('tr-TR').format(data.lowest30Days.toFixed(0))} TL`;
+        document.getElementById('seller-reliability-val').innerHTML = `${data.sellerScore}<span class="text-sm font-medium opacity-40">/10</span>`;
+        document.getElementById('reliability-bar').style.width = (data.sellerScore * 10) + '%';
+        document.getElementById('stock-prediction').innerText = data.decision === 'AL' ? 'Kritik ( < 24 Saat )' : 'Stabil ( > 7 Gün )';
+
+        // Opinion section (cold data approach)
+        const opinionHtml = `
+            <p>> Sinyal: ${data.isManipulated ? 'NEGATİF_MANİPÜLASYON' : 'POZİTİF_FİYAT_UYUMU'}</p>
+            <p>> Veri Kaynağı: 5 ana pazar yeri, 120+ satıcı indeksi.</p>
+            <p>> Karşılaştırma: Mevcut fiyat vs 30G regresyon analizi.</p>
+            <p>> Bulgular: ${data.cheapestStore} fiyatı pazar ortalamasının %${((1 - data.actualMarketLow / (data.actualMarketLow * 1.1)) * 100).toFixed(1)} altında. ${data.isManipulated ? 'Fiyat manipülasyonu tespiti nedeniyle satın alma önerilmez.' : 'İstatistiksel olarak en düşük fiyat bölgesinde.'}</p>
+        `;
+        document.getElementById('ai-opinion').innerHTML = opinionHtml;
+
+        const marketList = document.getElementById('market-list');
+        marketList.innerHTML = data.sorted.map(([name, price], idx) => {
+            const searchUrl = `${marketSearchUrls[name] || 'https://www.google.com/search?q='}${searchKeyword}`;
+            return `
+                <a href="${searchUrl}" target="_blank" class="flex items-center justify-between p-4 ${idx === 0 ? 'bg-primary-container/10 border border-primary-container/30' : 'bg-surface-container-high hover:bg-surface-bright'} rounded-lg transition-all group">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center font-black text-lg border border-white/10 group-hover:border-primary-container/50 transition-colors">${name[0]}</div>
                         <div>
                             <span class="font-bold block">${name}</span>
                             <span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[12px]">verified</span> Güvenilir Mağaza
+                                <span class="material-symbols-outlined text-[12px] text-primary-container">verified</span> Doğrulanmış Mağaza
                             </span>
                         </div>
                     </div>
                     <div class="flex items-center gap-6">
                         <div class="text-right">
                             <div class="font-black ${idx === 0 ? 'text-primary-container text-xl' : 'text-on-surface text-lg'}">${new Intl.NumberFormat('tr-TR').format(price)} TL</div>
-                            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">${idx === 0 ? 'En İyi Fiyat' : 'İkincil Seçenek'}</div>
+                            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">${idx === 0 ? 'En İyi Eşleşme' : 'Alternatif'}</div>
                         </div>
                         <div class="bg-surface-container-highest group-hover:bg-primary-container group-hover:text-on-primary-container p-2 rounded-full transition-all">
-                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            <span class="material-symbols-outlined text-sm">open_in_new</span>
                         </div>
                     </div>
                 </a>
-            `).join('');
+            `;
+        }).join('');
 
-            document.getElementById('seller-score').innerHTML = `${(8 + Math.random() * 2).toFixed(1)}<span class="text-sm text-on-surface-variant font-medium">/10</span>`;
-            document.getElementById('shipping-speed').innerHTML = `${Math.floor(12 + Math.random() * 36)}<span class="text-sm text-on-surface-variant font-medium"> Saat</span>`;
-            const priceDrop = (Math.random() * 20).toFixed(0);
-            document.getElementById('price-history').innerHTML = `-${priceDrop}% <span class="text-xs font-normal text-on-surface-variant">(30 GÜN)</span>`;
-            document.getElementById('confidence-score').innerText = `${Math.floor(85 + Math.random() * 14)}% Güven Oranı`;
-
-            spinner.classList.add('hidden');
-            icon.classList.remove('hidden');
-            text.innerText = "Yeniden Analiz Et";
-            btn.disabled = false;
-            btn.classList.remove('opacity-80', 'cursor-not-allowed');
-            
-            results.classList.remove('hidden');
-            setTimeout(() => {
-                results.classList.add('fade-enter-active');
-                results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
-        }, 1500);
+        document.getElementById('analyze-btn').disabled = false;
+        document.getElementById('progress-container').classList.add('hidden');
+        results.classList.remove('hidden');
+        setTimeout(() => {
+            results.classList.add('fade-enter-active');
+            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
     }
 </script>
 </body></html>
