@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AL MI? | The Decision Architect</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#410001",
+                    "tertiary-fixed-dim": "#f1c100",
+                    "secondary-fixed-dim": "#ffb4aa",
+                    "on-secondary": "#690003",
+                    "surface": "#131313",
+                    "on-tertiary-container": "#775e00",
+                    "on-tertiary": "#3d2f00",
+                    "secondary-fixed": "#ffdad5",
+                    "on-error-container": "#ffdad6",
+                    "on-background": "#e5e2e1",
+                    "surface-tint": "#00e639",
+                    "surface-variant": "#353534",
+                    "surface-dim": "#131313",
+                    "outline": "#84967e",
+                    "on-primary-container": "#007117",
+                    "surface-container-low": "#1c1b1b",
+                    "secondary": "#ffb4aa",
+                    "on-tertiary-fixed-variant": "#584400",
+                    "on-surface": "#e5e2e1",
+                    "inverse-primary": "#006e16",
+                    "background": "#131313",
+                    "surface-container": "#201f1f",
+                    "on-primary": "#003907",
+                    "on-secondary-fixed-variant": "#930005",
+                    "surface-bright": "#3a3939",
+                    "inverse-on-surface": "#313030",
+                    "primary-fixed": "#72ff70",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#00530e",
+                    "surface-container-lowest": "#0e0e0e",
+                    "surface-container-highest": "#353534",
+                    "on-secondary-container": "#ffd2cc",
+                    "on-primary-fixed": "#002203",
+                    "error": "#ffb4ab",
+                    "surface-container-high": "#2a2a2a",
+                    "primary": "#ebffe2",
+                    "outline-variant": "#3b4b37",
+                    "tertiary": "#fff8f0",
+                    "primary-fixed-dim": "#00e639",
+                    "primary-container": "#00ff41",
+                    "tertiary-container": "#ffd96b",
+                    "on-tertiary-fixed": "#241a00",
+                    "on-surface-variant": "#b9ccb2",
+                    "on-error": "#690005",
+                    "tertiary-fixed": "#ffe08b",
+                    "secondary-container": "#c5020b",
+                    "inverse-surface": "#e5e2e1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      body { font-family: 'Inter', sans-serif; }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(53, 53, 52, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .signature-glow {
+        background: radial-gradient(circle at center, rgba(0, 255, 65, 0.15) 0%, transparent 70%);
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<nav class="bg-[#131313] dark:bg-[#131313] docked full-width top-0 bg-gradient-to-b from-[#1C1B1B] to-transparent sticky z-50">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-black text-[#00FF41] tracking-tighter">AL MI?</div>
+<div class="hidden md:flex items-center space-gap-8 gap-8">
+<a class="text-[#00FF41] border-b-2 border-[#00FF41] pb-1 font-['Inter'] font-bold tracking-[-0.04em]" href="#">Discover</a>
+<a class="text-[#B9CCB2] hover:text-white transition-colors font-['Inter'] font-bold tracking-[-0.04em]" href="#">History</a>
+<a class="text-[#B9CCB2] hover:text-white transition-colors font-['Inter'] font-bold tracking-[-0.04em]" href="#">Archives</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-[#B9CCB2] hover:bg-[#2A2A2A] rounded-full transition-all active:scale-95 duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 text-[#B9CCB2] hover:bg-[#2A2A2A] rounded-full transition-all active:scale-95 duration-150">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="flex-grow flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+<!-- Signature Ambient Glow -->
+<div class="absolute inset-0 signature-glow pointer-events-none"></div>
+<div class="w-full max-w-4xl z-10">
+<!-- Central Interactive Hub -->
+<div class="space-y-12">
+<!-- Initial State UI (Input & Action) -->
+<section class="text-center space-y-8">
+<h1 class="text-5xl md:text-7xl font-extrabold tracking-[-0.04em] text-on-surface leading-tight">
+                        Ürün yaz veya <br/><span class="text-primary-container">fotoğraf çek</span>.
+                    </h1>
+<div class="relative group max-w-2xl mx-auto">
+<div class="bg-surface-container-lowest rounded-xl p-6 transition-all duration-300 focus-within:bg-surface-container-high focus-within:ring-2 focus-within:ring-outline-variant/12">
+<div class="flex items-center gap-4">
+<!-- Photo Preview Chip (Simulated) -->
+<div class="hidden flex items-center bg-surface-container-high rounded-full pl-2 pr-4 py-1 gap-2 outline outline-1 outline-outline-variant/20">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="close-up profile of a minimalist white smartwatch with clean studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYa-pWqwrwIBsioH3adAo2Lga7rWKHAVxZYLgWrIMijFfQ3gAlEenPoj3J_l_Q-sMs29921NgXoWQMACK5lSmwu5wpiFQqdi8WyPpTU9MnYeywXaoGv2ZigfTuihH6A8pS9G5bQBx5Q8TBWq2qGfwneM16hiReg9VokadKjPATpw7OPNSkCWmGndyE4CXyZnGycxqqt-fiVWDOrWzX8bP024tZTXTdOuvASrMjWZeio4woJM2ILAsJ0HonCb8vjIhFFCSbTN4WUZY1"/>
+<span class="text-[10px] font-bold tracking-wider uppercase text-on-surface-variant">Photo.jpg</span>
+</div>
+<input class="bg-transparent border-none focus:ring-0 w-full text-xl placeholder:text-on-surface-variant/40 text-on-surface font-medium" placeholder="Ürün adı veya link yapıştır..." type="text"/>
+<button class="bg-primary-container text-on-primary-container px-8 py-3 rounded-full font-bold tracking-tight hover:scale-105 transition-transform active:scale-95">
+                                    Analiz Et
+                                </button>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap justify-center gap-4">
+<button class="flex items-center gap-3 px-8 py-4 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors group">
+<span class="material-symbols-outlined text-primary-container group-hover:scale-110 transition-transform">photo_camera</span>
+<span class="font-bold tracking-tight">Kamera</span>
+</button>
+<button class="flex items-center gap-3 px-8 py-4 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors group">
+<span class="material-symbols-outlined text-primary-container group-hover:scale-110 transition-transform">file_upload</span>
+<span class="font-bold tracking-tight">Fotoğraf Yükle</span>
+</button>
+</div>
+</section>
+<!-- Result State (The Core Verdict) -->
+<section class="glass-card rounded-xl p-10 md:p-16 text-center border border-outline-variant/10 relative overflow-hidden">
+<!-- Scanning Overlay (Simulated hidden by default) -->
+<div class="absolute inset-0 bg-surface/80 flex flex-col items-center justify-center z-20 opacity-0 pointer-events-none">
+<div class="w-16 h-16 border-4 border-primary-container border-t-transparent rounded-full animate-spin mb-6"></div>
+<p class="text-sm font-bold tracking-[0.2em] uppercase text-primary-container">Yapay Zeka Karar Mimarı analiz ediyor...</p>
+</div>
+<div class="space-y-8">
+<div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary-container text-on-primary-container shadow-[0_0_40px_rgba(0,230,57,0.2)]">
+<span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<h2 class="text-8xl md:text-[10rem] font-black tracking-[-0.06em] leading-none text-primary-container">AL</h2>
+<p class="text-on-surface-variant text-lg mt-4 max-w-md mx-auto leading-relaxed">
+                                Bu ürün şu an <span class="text-on-surface font-bold">piyasa ortalaması</span> altında ve <span class="text-on-surface font-bold">fiyat trendi</span> düşüşte. Kaçırılmayacak bir <span class="text-on-surface font-bold">indirim durumu</span> mevcut.
+                            </p>
+</div>
+<div class="pt-8 flex flex-col items-center gap-6">
+<button class="flex items-center gap-2 px-10 py-4 bg-primary-container text-on-primary-container rounded-full font-black tracking-tighter hover:shadow-lg transition-all active:scale-95 group">
+<span class="material-symbols-outlined">share</span>
+                                BU ÜRÜN AL ÇIKTI!
+                            </button>
+<div class="flex gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-sm">public</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-sm">chat_bubble</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-sm">alternate_email</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Secondary Actions -->
+<div class="flex justify-center">
+<button class="text-[#B9CCB2] hover:text-[#00FF41] font-['Inter'] text-[10px] tracking-[0.2em] uppercase flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-base">refresh</span>
+                        TEKRAR DENE
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Side Navigation (Web Only - Authority Shell) -->
+<aside class="hidden md:flex fixed left-0 top-0 h-screen w-64 flex-col py-8 z-40 bg-[#0E0E0E] dark:bg-[#0E0E0E] border-r border-[#3B4B37]/12 shadow-[40px_0_40px_rgba(0,230,57,0.08)]">
+<div class="px-6 mb-12">
+<h3 class="font-['Inter'] text-sm tracking-widest uppercase text-[#00FF41] mb-1">The Curator</h3>
+<p class="text-[#B9CCB2] text-[10px] tracking-widest">DECISION ARCHITECT</p>
+</div>
+<nav class="flex-grow flex flex-col gap-1">
+<a class="flex items-center gap-4 bg-[#2A2A2A] text-[#00FF41] rounded-r-full mr-4 px-6 py-3 font-bold transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-['Inter'] text-sm tracking-widest uppercase">Analyze</span>
+</a>
+<a class="flex items-center gap-4 text-[#B9CCB2] px-6 py-3 hover:bg-[#1C1B1B] hover:text-white transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-['Inter'] text-sm tracking-widest uppercase">Recent</span>
+</a>
+<a class="flex items-center gap-4 text-[#B9CCB2] px-6 py-3 hover:bg-[#1C1B1B] hover:text-white transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-['Inter'] text-sm tracking-widest uppercase">Saved</span>
+</a>
+<a class="flex items-center gap-4 text-[#B9CCB2] px-6 py-3 hover:bg-[#1C1B1B] hover:text-white transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Inter'] text-sm tracking-widest uppercase">Community</span>
+</a>
+</nav>
+<div class="px-6 mt-auto space-y-4">
+<button class="w-full bg-primary-container text-on-primary-container py-4 rounded-xl font-bold tracking-tight hover:scale-[1.02] transition-transform">
+                New Analysis
+            </button>
+<div class="pt-8 border-t border-outline-variant/10">
+<a class="flex items-center gap-3 text-[#B9CCB2] py-2 text-[10px] tracking-widest uppercase hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">settings</span> Settings
+                </a>
+<a class="flex items-center gap-3 text-[#B9CCB2] py-2 text-[10px] tracking-widest uppercase hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">help_outline</span> Support
+                </a>
+</div>
+</div>
+</aside>
+<!-- Footer -->
+<footer class="w-full py-6 px-12 flex flex-col md:flex-row justify-between items-center opacity-60 bg-transparent">
+<p class="font-['Inter'] text-[10px] tracking-[0.05em] uppercase text-[#B9CCB2]">
+            © 2024 THE DECISION ARCHITECT. CURATED BY AL MI?
+        </p>
+<div class="flex gap-8 mt-4 md:mt-0">
+<a class="font-['Inter'] text-[10px] tracking-[0.05em] uppercase text-[#B9CCB2] hover:text-[#00FF41] transition-colors" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.05em] uppercase text-[#B9CCB2] hover:text-[#00FF41] transition-colors" href="#">Terms of Service</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.05em] uppercase text-[#B9CCB2] hover:text-[#00FF41] transition-colors" href="#">API Documentation</a>
+</div>
+</footer>
+<!-- Bottom Navigation (Mobile Only) -->
+<div class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-low/80 backdrop-blur-xl border-t border-outline-variant/10 flex justify-around items-center py-4 z-50">
+<button class="flex flex-col items-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="text-[10px] font-bold mt-1">Analyze</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">history</span>
+<span class="text-[10px] mt-1">Recent</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="text-[10px] mt-1">Saved</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] mt-1">Profile</span>
+</button>
+</div>
+</body></html>
