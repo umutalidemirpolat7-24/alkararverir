@@ -7,7 +7,6 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -82,9 +81,18 @@
       .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
       .glass-panel { background: rgba(53, 53, 52, 0.6); backdrop-filter: blur(20px); }
       .mesh-glow { background: radial-gradient(circle at 50% 50%, rgba(0, 255, 65, 0.15) 0%, transparent 70%); }
+      
+      #video-preview, #image-preview {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+      }
+      .hidden-input { display: none; }
+      .fade-enter { opacity: 0; transform: translateY(10px); }
+      .fade-enter-active { opacity: 1; transform: translateY(0); transition: all 0.5s ease-out; }
     </style>
 </head>
-<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
 <!-- TopNavBar -->
 <header class="bg-[#131313] text-[#00FF41] font-['Inter'] font-bold tracking-tight text-on-surface docked full-width top-0 sticky z-50 bg-gradient-to-b from-[#1C1B1B] to-transparent flat no shadows">
 <div class="flex justify-between items-center px-6 h-16 w-full max-w-screen-2xl mx-auto">
@@ -141,26 +149,41 @@
 <input class="bg-transparent border-none p-0 text-3xl font-bold text-primary-container focus:ring-0 placeholder:text-surface-container-high" placeholder="12.500" type="number"/>
 </div>
 <!-- Camera Viewfinder / Drop Zone -->
-<div class="relative h-48 bg-surface-container-low rounded-xl overflow-hidden cursor-pointer group outline-dashed outline-2 outline-outline-variant/30 hover:outline-primary-container/50 transition-all">
-<div class="absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant group-hover:text-primary-container transition-colors">
-<span class="material-symbols-outlined text-4xl mb-2" style="font-variation-settings: 'FILL' 0;">photo_camera</span>
-<span class="text-xs font-bold tracking-widest uppercase">Fotoğraf Yükle veya Sürükle</span>
+<div class="relative h-48 bg-surface-container-low rounded-xl overflow-hidden cursor-pointer group outline-dashed outline-2 outline-outline-variant/30 hover:outline-primary-container/50 transition-all" onclick="document.getElementById('file-upload').click()">
+<!-- File Input (Hidden) -->
+<input accept="image/*" class="hidden-input" id="file-upload" onchange="handleFileUpload(event)" type="file"/>
+<!-- Video element for camera simulation -->
+<video autoplay="" class="hidden" id="video-preview" playsinline=""></video>
+<!-- Image preview -->
+<img class="hidden" id="image-preview"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant group-hover:text-primary-container transition-colors" id="drop-zone-content">
+<span class="material-symbols-outlined text-4xl mb-2" id="camera-icon" style="font-variation-settings: 'FILL' 0;">photo_camera</span>
+<span class="text-xs font-bold tracking-widest uppercase" id="upload-text">Fotoğraf Yükle veya Sürükle</span>
 </div>
+<!-- Capture Button (Only visible during camera simulation) -->
+<button class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-container px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest z-10 hover:scale-105 active:scale-95 transition-all" id="capture-btn" onclick="captureImage(event)">Fotoğrafı Çek</button>
 <!-- Viewfinder Corners -->
-<div class="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-outline-variant group-hover:border-primary-container transition-colors"></div>
-<div class="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-outline-variant group-hover:border-primary-container transition-colors"></div>
-<div class="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-outline-variant group-hover:border-primary-container transition-colors"></div>
-<div class="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-outline-variant group-hover:border-primary-container transition-colors"></div>
+<div class="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
+<div class="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
+<div class="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
+<div class="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
 </div>
 </div>
-<button class="w-full bg-primary-container text-on-primary-container py-6 rounded-full text-xl font-black uppercase tracking-tighter hover:scale-[1.01] active:scale-95 transition-all shadow-[0_0_40px_rgba(0,255,65,0.15)] flex items-center justify-center gap-3">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
-                        Yapay Zeka ile Analiz Et
-                    </button>
+<div class="flex gap-4">
+<button class="flex-1 bg-surface-container-high text-on-surface py-6 rounded-full text-lg font-bold uppercase tracking-tighter hover:bg-surface-bright transition-all flex items-center justify-center gap-3" id="camera-trigger" onclick="simulateCamera()">
+<span class="material-symbols-outlined">camera_alt</span>
+        Kamera
+    </button>
+<button class="flex-[2] bg-primary-container text-on-primary-container py-6 rounded-full text-xl font-black uppercase tracking-tighter hover:scale-[1.01] active:scale-95 transition-all shadow-[0_0_40px_rgba(0,255,65,0.15)] flex items-center justify-center gap-3" id="analyze-btn" onclick="startAnalysis()">
+<span class="material-symbols-outlined" id="analyze-icon" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="hidden animate-spin material-symbols-outlined" id="analyze-spinner">progress_activity</span>
+<span id="analyze-text">Yapay Zeka ile Analiz Et</span>
+</button>
+</div>
 </div>
 </section>
-<!-- Results Section (Simulated State) -->
-<section class="space-y-12">
+<!-- Results Section (Initially Hidden) -->
+<section class="hidden space-y-12 fade-enter" id="results-section">
 <!-- Primary Verdict Card -->
 <div class="glass-panel rounded-xl p-10 relative overflow-hidden">
 <div class="absolute top-0 right-0 p-8">
@@ -285,4 +308,108 @@
 <span class="font-['Inter'] text-[10px] font-medium tracking-wide">Savings</span>
 </a>
 </nav>
+<script>
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                showPreview(e.target.result);
+                startAnalysis();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function showPreview(src) {
+        const preview = document.getElementById('image-preview');
+        const video = document.getElementById('video-preview');
+        const content = document.getElementById('drop-zone-content');
+        const captureBtn = document.getElementById('capture-btn');
+
+        preview.src = src;
+        preview.classList.remove('hidden');
+        video.classList.add('hidden');
+        content.classList.add('hidden');
+        captureBtn.classList.add('hidden');
+    }
+
+    async function simulateCamera() {
+        const video = document.getElementById('video-preview');
+        const content = document.getElementById('drop-zone-content');
+        const preview = document.getElementById('image-preview');
+        const captureBtn = document.getElementById('capture-btn');
+
+        content.classList.add('hidden');
+        preview.classList.add('hidden');
+        video.classList.remove('hidden');
+        captureBtn.classList.remove('hidden');
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (err) {
+            console.error("Camera access denied or unavailable", err);
+            // Fallback for simulation if camera is blocked
+            alert("Kamera erişimi reddedildi veya bulunamadı. Lütfen bir dosya yükleyin.");
+            content.classList.remove('hidden');
+            video.classList.add('hidden');
+            captureBtn.classList.add('hidden');
+        }
+    }
+
+    function captureImage(event) {
+        event.stopPropagation();
+        const video = document.getElementById('video-preview');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        
+        // Stop stream
+        const stream = video.srcObject;
+        if (stream) {
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+        }
+        
+        showPreview(dataUrl);
+        startAnalysis();
+    }
+
+    function startAnalysis() {
+        const btn = document.getElementById('analyze-btn');
+        const icon = document.getElementById('analyze-icon');
+        const spinner = document.getElementById('analyze-spinner');
+        const text = document.getElementById('analyze-text');
+        const results = document.getElementById('results-section');
+
+        // Disable UI
+        btn.disabled = true;
+        btn.classList.add('opacity-80', 'cursor-not-allowed');
+        icon.classList.add('hidden');
+        spinner.classList.remove('hidden');
+        text.innerText = "Analiz Ediliyor...";
+        results.classList.add('hidden');
+
+        // Simulate processing delay
+        setTimeout(() => {
+            spinner.classList.add('hidden');
+            icon.classList.remove('hidden');
+            text.innerText = "Analiz Edildi";
+            btn.classList.remove('bg-primary-container');
+            btn.classList.add('bg-surface-container-high');
+            
+            // Show Results with animation
+            results.classList.remove('hidden');
+            setTimeout(() => {
+                results.classList.add('fade-enter-active');
+                results.scrollIntoView({ behavior: 'smooth' });
+            }, 50);
+        }, 2000);
+    }
+</script>
 </body></html>
