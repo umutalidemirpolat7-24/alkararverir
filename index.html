@@ -81,21 +81,15 @@
       .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
       .glass-panel { background: rgba(53, 53, 52, 0.6); backdrop-filter: blur(20px); }
       .mesh-glow { background: radial-gradient(circle at 50% 50%, rgba(0, 255, 65, 0.15) 0%, transparent 70%); }
-      
-      #video-preview, #image-preview {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-      }
+      #video-preview, #image-preview { width: 100%; height: 100%; object-fit: cover; }
       .hidden-input { display: none; }
-      .fade-enter { opacity: 0; transform: translateY(10px); }
-      .fade-enter-active { opacity: 1; transform: translateY(0); transition: all 0.5s ease-out; }
+      .fade-enter { opacity: 0; transform: translateY(10px); transition: all 0.5s ease-out; }
+      .fade-enter-active { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
-<!-- TopNavBar -->
-<header class="bg-[#131313] text-[#00FF41] font-['Inter'] font-bold tracking-tight text-on-surface docked full-width top-0 sticky z-50 bg-gradient-to-b from-[#1C1B1B] to-transparent flat no shadows">
-<div class="flex justify-between items-center px-6 h-16 w-full max-w-screen-2xl mx-auto">
+<header class="bg-[#131313] text-[#00FF41] font-['Inter'] font-bold tracking-tight docked full-width top-0 sticky z-50 bg-gradient-to-b from-[#1C1B1B] to-transparent flat no-shadows">
+<div class="flex justify-between items-center px-6 h-16 w-full max-screen-2xl mx-auto">
 <div class="text-xl font-black tracking-[-0.04em] text-[#00FF41]">Decision Architect</div>
 <div class="hidden md:flex gap-8 items-center">
 <a class="text-[#00FF41] font-bold hover:text-[#00FF41] transition-colors duration-200" href="#">Analysis</a>
@@ -109,7 +103,6 @@
 </div>
 </header>
 <div class="flex min-h-screen">
-<!-- SideNavBar (Desktop) -->
 <aside class="hidden lg:flex flex-col p-4 gap-2 bg-[#131313] h-screen w-64 border-r border-[#3B4B37]/10 flat">
 <div class="mb-8 px-4">
 <div class="text-lg font-black text-[#00FF41]">The Curator</div>
@@ -118,51 +111,41 @@
 <nav class="space-y-2">
 <a class="flex items-center gap-3 px-4 py-3 bg-[#2A2A2A] text-[#00FF41] rounded-lg font-['Inter'] text-sm tracking-[0.05em] uppercase transition-all scale-98" href="#">
 <span class="material-symbols-outlined" data-icon="analytics">analytics</span> Analysis
-                </a>
+            </a>
 <a class="flex items-center gap-3 px-4 py-3 text-[#B9CCB2] hover:bg-[#1C1B1B] rounded-lg font-['Inter'] text-sm tracking-[0.05em] uppercase transition-all" href="#">
 <span class="material-symbols-outlined" data-icon="history_toggle_off">history_toggle_off</span> History
-                </a>
+            </a>
 <a class="flex items-center gap-3 px-4 py-3 text-[#B9CCB2] hover:bg-[#1C1B1B] rounded-lg font-['Inter'] text-sm tracking-[0.05em] uppercase transition-all" href="#">
 <span class="material-symbols-outlined" data-icon="payments">payments</span> Savings
-                </a>
+            </a>
 </nav>
 </aside>
-<!-- Main Content -->
 <main class="flex-1 w-full max-w-5xl mx-auto px-6 py-12 pb-32">
-<!-- Hero Analysis Section -->
 <section class="relative mb-20">
 <div class="absolute -top-24 -left-24 w-96 h-96 mesh-glow pointer-events-none"></div>
 <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-12">
-                    Mükemmel Alışveriş <br/>
+                Mükemmel Alışveriş <br/>
 <span class="text-primary-container">Yapay Zeka</span> Analizi.
-                </h1>
+            </h1>
 <div class="space-y-6">
-<!-- Product Link Input -->
 <div class="relative group">
-<input class="w-full bg-surface-container-lowest border-none rounded-xl p-8 text-xl font-medium focus:ring-2 focus:ring-primary-fixed outline-none placeholder:text-on-surface-variant/40 transition-all" placeholder="Ürün Adı veya Linki Yapıştırın" type="text"/>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl p-8 text-xl font-medium focus:ring-2 focus:ring-primary-fixed outline-none placeholder:text-on-surface-variant/40 transition-all" id="product-input" placeholder="Ürün Adı veya Linki Yapıştırın (Örn: iPhone 15, Laptop, T-shirt)" type="text"/>
 <span class="absolute right-8 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant/50">link</span>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<!-- Price Input -->
 <div class="bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-center">
 <label class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 font-bold">GÜNCEL FİYAT (TL)</label>
-<input class="bg-transparent border-none p-0 text-3xl font-bold text-primary-container focus:ring-0 placeholder:text-surface-container-high" placeholder="12.500" type="number"/>
+<input class="bg-transparent border-none p-0 text-3xl font-bold text-primary-container focus:ring-0 placeholder:text-surface-container-high" id="price-input" placeholder="Fiyat Giriniz" type="number"/>
 </div>
-<!-- Camera Viewfinder / Drop Zone -->
 <div class="relative h-48 bg-surface-container-low rounded-xl overflow-hidden cursor-pointer group outline-dashed outline-2 outline-outline-variant/30 hover:outline-primary-container/50 transition-all" onclick="document.getElementById('file-upload').click()">
-<!-- File Input (Hidden) -->
 <input accept="image/*" class="hidden-input" id="file-upload" onchange="handleFileUpload(event)" type="file"/>
-<!-- Video element for camera simulation -->
 <video autoplay="" class="hidden" id="video-preview" playsinline=""></video>
-<!-- Image preview -->
 <img class="hidden" id="image-preview"/>
 <div class="absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant group-hover:text-primary-container transition-colors" id="drop-zone-content">
 <span class="material-symbols-outlined text-4xl mb-2" id="camera-icon" style="font-variation-settings: 'FILL' 0;">photo_camera</span>
 <span class="text-xs font-bold tracking-widest uppercase" id="upload-text">Fotoğraf Yükle veya Sürükle</span>
 </div>
-<!-- Capture Button (Only visible during camera simulation) -->
 <button class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-container px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest z-10 hover:scale-105 active:scale-95 transition-all" id="capture-btn" onclick="captureImage(event)">Fotoğrafı Çek</button>
-<!-- Viewfinder Corners -->
 <div class="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
 <div class="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
 <div class="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-outline-variant group-hover:border-primary-container transition-colors pointer-events-none"></div>
@@ -171,9 +154,8 @@
 </div>
 <div class="flex gap-4">
 <button class="flex-1 bg-surface-container-high text-on-surface py-6 rounded-full text-lg font-bold uppercase tracking-tighter hover:bg-surface-bright transition-all flex items-center justify-center gap-3" id="camera-trigger" onclick="simulateCamera()">
-<span class="material-symbols-outlined">camera_alt</span>
-        Kamera
-    </button>
+<span class="material-symbols-outlined">camera_alt</span> Kamera
+                    </button>
 <button class="flex-[2] bg-primary-container text-on-primary-container py-6 rounded-full text-xl font-black uppercase tracking-tighter hover:scale-[1.01] active:scale-95 transition-all shadow-[0_0_40px_rgba(0,255,65,0.15)] flex items-center justify-center gap-3" id="analyze-btn" onclick="startAnalysis()">
 <span class="material-symbols-outlined" id="analyze-icon" style="font-variation-settings: 'FILL' 1;">bolt</span>
 <span class="hidden animate-spin material-symbols-outlined" id="analyze-spinner">progress_activity</span>
@@ -182,95 +164,61 @@
 </div>
 </div>
 </section>
-<!-- Results Section (Initially Hidden) -->
 <section class="hidden space-y-12 fade-enter" id="results-section">
-<!-- Primary Verdict Card -->
 <div class="glass-panel rounded-xl p-10 relative overflow-hidden">
 <div class="absolute top-0 right-0 p-8">
 <div class="flex items-center gap-2 bg-primary-container/10 text-primary-container px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
 <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
-                            98% Güven Oranı
-                        </div>
+<span id="confidence-score">98% Güven Oranı</span>
+</div>
 </div>
 <div class="flex flex-col md:flex-row items-end gap-8 mb-10">
 <div class="flex-1">
 <label class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-black">NİHAİ KARAR</label>
-<h2 class="text-9xl font-black tracking-[-0.06em] text-primary-container">AL</h2>
+<h2 class="text-9xl font-black tracking-[-0.06em]" id="verdict-text">AL</h2>
 </div>
 <div class="flex-1 pb-4">
-<p class="text-xl text-on-surface/80 leading-relaxed font-medium">
-                                "Bu ürün son 30 günün en düşük fiyat seviyesinde. Satıcı puanı ve kargo hızı verimlilik standartlarımızı karşılıyor."
-                            </p>
+<p class="text-xl text-on-surface/80 leading-relaxed font-medium" id="verdict-description">
+                            "Bu ürün son 30 günün en düşük fiyat seviyesinde. Satıcı puanı ve kargo hızı verimlilik standartlarımızı karşılıyor."
+                        </p>
 </div>
 </div>
 <div class="flex gap-4">
 <button class="flex-1 bg-surface-container-high text-on-surface py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-surface-bright transition-colors">
 <span class="material-symbols-outlined text-sm">share</span> Ekiple Paylaş
-                        </button>
+                    </button>
 <button class="flex-1 bg-surface-container-high text-on-surface py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-surface-bright transition-colors">
 <span class="material-symbols-outlined text-sm">bookmark</span> Tasarrufa Kaydet
-                        </button>
+                    </button>
 </div>
 </div>
-<!-- Market Comparison Bento -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- Source Analysis -->
 <div class="md:col-span-2 bg-surface-container-low rounded-xl p-8">
 <h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6 flex items-center gap-2">
 <span class="material-symbols-outlined text-sm">travel_explore</span> Kaynak Analizi
-                        </h3>
-<div class="space-y-4">
-<div class="flex items-center justify-between p-4 bg-surface-container-high rounded-lg hover:bg-surface-bright transition-all cursor-pointer group">
-<div class="flex items-center gap-4">
-<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">H</div>
-<span class="font-bold">Hepsiburada.com</span>
-</div>
-<div class="text-right">
-<div class="font-black text-primary-container">12.500 TL</div>
-<div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">En İyi Fiyat</div>
+                    </h3>
+<div class="space-y-4" id="market-list">
+<!-- Dynamic Market Items -->
 </div>
 </div>
-<div class="flex items-center justify-between p-4 bg-surface-container-high/50 rounded-lg hover:bg-surface-bright transition-all cursor-pointer group">
-<div class="flex items-center gap-4">
-<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">A</div>
-<span class="font-bold">Amazon.com.tr</span>
-</div>
-<div class="text-right">
-<div class="font-black text-on-surface-variant">12.900 TL</div>
-</div>
-</div>
-<div class="flex items-center justify-between p-4 bg-surface-container-high/50 rounded-lg hover:bg-surface-bright transition-all cursor-pointer group">
-<div class="flex items-center gap-4">
-<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">T</div>
-<span class="font-bold">Trendyol</span>
-</div>
-<div class="text-right">
-<div class="font-black text-on-surface-variant">12.450 TL</div>
-<div class="text-[10px] text-secondary font-bold uppercase tracking-tighter">Stok Az</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Market Pulse -->
 <div class="bg-surface-container-low rounded-xl p-8 flex flex-col">
 <h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6">Pazar Nabzı</h3>
 <div class="space-y-8 flex-1">
 <div>
 <div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Satıcı Puanı</div>
-<div class="text-3xl font-black text-primary-container">9.8<span class="text-sm text-on-surface-variant font-medium">/10</span></div>
+<div class="text-3xl font-black text-primary-container" id="seller-score">9.8<span class="text-sm text-on-surface-variant font-medium">/10</span></div>
 </div>
 <div>
 <div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Kargo Hızı</div>
-<div class="text-3xl font-black">24<span class="text-sm text-on-surface-variant font-medium"> Saat</span></div>
+<div class="text-3xl font-black" id="shipping-speed">24<span class="text-sm text-on-surface-variant font-medium"> Saat</span></div>
 </div>
 <div>
 <div class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Fiyat Geçmişi</div>
-<div class="text-xl font-bold text-secondary-fixed-dim">-15% <span class="text-xs font-normal text-on-surface-variant">(30 GÜN)</span></div>
+<div class="text-xl font-bold text-secondary-fixed-dim" id="price-history">-15% <span class="text-xs font-normal text-on-surface-variant">(30 GÜN)</span></div>
 </div>
 </div>
 </div>
 </div>
-<!-- Professional Verdict Deep Dive -->
 <div class="bg-surface-container-lowest rounded-xl p-10 border border-outline-variant/10">
 <div class="flex items-center gap-4 mb-6">
 <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
@@ -281,40 +229,46 @@
 <p class="text-[10px] font-bold uppercase text-on-surface-variant tracking-widest">Decision Architect AI v4.2</p>
 </div>
 </div>
-<div class="space-y-4 text-on-surface-variant leading-relaxed text-lg italic">
-<p>
-                            "Mevcut piyasa verileri, analiz edilen ürünün (Apple MacBook Pro M3) Türkiye pazarındaki dalgalanma eğiliminin sonuna geldiğini gösteriyor. Trendyol üzerindeki 12.450 TL'lik fiyat her ne kadar en düşük görünse de, satıcı güvenilirliği ve kargo süresi baz alındığında Hepsiburada tercihi 50 TL farkla daha rasyoneldir."
-                        </p>
-<p>
-                            "Öneri: Hemen satın alarak yaklaşık 450 TL tasarruf sağlayın ve olası kur güncellemesinden kaçının."
-                        </p>
+<div class="space-y-4 text-on-surface-variant leading-relaxed text-lg italic" id="ai-opinion">
+<!-- Dynamic Opinion -->
 </div>
 </div>
 </section>
 </main>
 </div>
-<!-- BottomNavBar (Mobile) -->
 <nav class="lg:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-8 pb-6 pt-2 bg-[#131313]/80 backdrop-blur-xl border-t border-[#3B4B37]/12 shadow-[0_-8px_30px_rgb(0,230,57,0.08)] z-50">
-<a class="flex flex-col items-center justify-center bg-[#2A2A2A] text-[#00FF41] rounded-full p-3 scale-90 duration-300 spring-bounce" href="#">
-<span class="material-symbols-outlined" data-icon="photo_camera" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+<a class="flex flex-col items-center justify-center bg-[#2A2A2A] text-[#00FF41] rounded-full p-3 scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
 <span class="font-['Inter'] text-[10px] font-medium tracking-wide">Analysis</span>
 </a>
 <a class="flex flex-col items-center justify-center text-[#B9CCB2] p-3 hover:bg-[#1C1B1B]" href="#">
-<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="material-symbols-outlined">history</span>
 <span class="font-['Inter'] text-[10px] font-medium tracking-wide">History</span>
 </a>
 <a class="flex flex-col items-center justify-center text-[#B9CCB2] p-3 hover:bg-[#1C1B1B]" href="#">
-<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="material-symbols-outlined">trending_up</span>
 <span class="font-['Inter'] text-[10px] font-medium tracking-wide">Savings</span>
 </a>
 </nav>
 <script>
+    const productPresets = {
+        'iphone': { min: 45000, max: 85000, category: 'Teknoloji', name: 'iPhone 15 Pro Max' },
+        'macbook': { min: 38000, max: 120000, category: 'Teknoloji', name: 'Apple MacBook Pro M3' },
+        'tshirt': { min: 150, max: 850, category: 'Giyim', name: 'Premium Pamuklu T-shirt' },
+        'ayakkabı': { min: 1200, max: 4500, category: 'Giyim', name: 'Nike Air Max' },
+        'laptop': { min: 12000, max: 45000, category: 'Teknoloji', name: 'Yüksek Performanslı Laptop' },
+        'kitap': { min: 50, max: 250, category: 'Medya', name: 'Bestseller Roman' }
+    };
+
     function handleFileUpload(event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 showPreview(e.target.result);
+                // Auto-fill product if file name suggests something
+                const input = document.getElementById('product-input');
+                if (!input.value) input.value = "Yüklenen Görseldeki Ürün";
                 startAnalysis();
             };
             reader.readAsDataURL(file);
@@ -326,7 +280,6 @@
         const video = document.getElementById('video-preview');
         const content = document.getElementById('drop-zone-content');
         const captureBtn = document.getElementById('capture-btn');
-
         preview.src = src;
         preview.classList.remove('hidden');
         video.classList.add('hidden');
@@ -339,19 +292,15 @@
         const content = document.getElementById('drop-zone-content');
         const preview = document.getElementById('image-preview');
         const captureBtn = document.getElementById('capture-btn');
-
         content.classList.add('hidden');
         preview.classList.add('hidden');
         video.classList.remove('hidden');
         captureBtn.classList.remove('hidden');
-
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
         } catch (err) {
-            console.error("Camera access denied or unavailable", err);
-            // Fallback for simulation if camera is blocked
-            alert("Kamera erişimi reddedildi veya bulunamadı. Lütfen bir dosya yükleyin.");
+            alert("Kamera erişimi reddedildi. Lütfen dosya yükleyin.");
             content.classList.remove('hidden');
             video.classList.add('hidden');
             captureBtn.classList.add('hidden');
@@ -366,28 +315,81 @@
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
         const dataUrl = canvas.toDataURL('image/jpeg');
-        
-        // Stop stream
         const stream = video.srcObject;
-        if (stream) {
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
-        }
-        
+        if (stream) stream.getTracks().forEach(track => track.stop());
         showPreview(dataUrl);
+        const input = document.getElementById('product-input');
+        if (!input.value) input.value = "Kamera ile Çekilen Ürün";
         startAnalysis();
     }
 
+    function generateAnalysisData(userInput, userPrice) {
+        let productName = userInput || "Tanımlanamayan Ürün";
+        let minBase = 1000, maxBase = 5000;
+        
+        // Find match in presets
+        for (let key in productPresets) {
+            if (productName.toLowerCase().includes(key)) {
+                minBase = productPresets[key].min;
+                maxBase = productPresets[key].max;
+                productName = productPresets[key].name;
+                break;
+            }
+        }
+
+        // If user price exists, anchor base around it
+        if (userPrice > 0) {
+            minBase = userPrice * 0.85;
+            maxBase = userPrice * 1.15;
+        }
+
+        const marketLow = Math.floor(minBase + Math.random() * (maxBase - minBase) * 0.3);
+        const prices = {
+            'Hepsiburada.com': marketLow + Math.floor(Math.random() * 100),
+            'Amazon.com.tr': marketLow + Math.floor(Math.random() * 300),
+            'Trendyol': marketLow - Math.floor(Math.random() * 50)
+        };
+
+        const sorted = Object.entries(prices).sort((a, b) => a[1] - b[1]);
+        const actualMarketLow = sorted[0][1];
+        
+        let decision = 'AL';
+        let color = 'text-primary-container';
+        let desc = "";
+
+        if (userPrice <= actualMarketLow) {
+            decision = 'AL';
+            color = 'text-primary-container';
+            desc = `"${productName} için girdiğiniz fiyat piyasadaki en iyi tekliflerle yarışıyor. Kaçırmamanızı öneririz."`;
+        } else if (userPrice <= actualMarketLow * 1.08) {
+            decision = 'BEKLE';
+            color = 'text-tertiary-fixed-dim';
+            desc = `"${productName} şu an ortalama bir fiyatta. Acil değilse %5-8 arası bir indirim beklenebilir."`;
+        } else {
+            decision = 'ALMA';
+            color = 'text-secondary-container';
+            desc = `"${productName} için bu fiyat oldukça yüksek. Piyasada daha uygun seçenekler mevcut, bütçenizi koruyun."`;
+        }
+
+        return { productName, sorted, decision, color, desc, actualMarketLow };
+    }
+
     function startAnalysis() {
+        const userInput = document.getElementById('product-input').value;
+        const userPrice = parseFloat(document.getElementById('price-input').value) || 0;
+
+        if (!userInput && !userPrice) {
+            alert("Lütfen bir ürün ismi veya fiyat giriniz.");
+            return;
+        }
+
         const btn = document.getElementById('analyze-btn');
         const icon = document.getElementById('analyze-icon');
         const spinner = document.getElementById('analyze-spinner');
         const text = document.getElementById('analyze-text');
         const results = document.getElementById('results-section');
 
-        // Disable UI
         btn.disabled = true;
         btn.classList.add('opacity-80', 'cursor-not-allowed');
         icon.classList.add('hidden');
@@ -395,21 +397,56 @@
         text.innerText = "Analiz Ediliyor...";
         results.classList.add('hidden');
 
-        // Simulate processing delay
         setTimeout(() => {
+            const data = generateAnalysisData(userInput, userPrice);
+            
+            // Update UI
+            document.getElementById('verdict-text').innerText = data.decision;
+            document.getElementById('verdict-text').className = `text-9xl font-black tracking-[-0.06em] ${data.color}`;
+            document.getElementById('verdict-description').innerText = data.desc;
+            
+            // AI Opinion
+            const opinionHtml = `
+                <p>"${data.productName} analizimiz sonucunda, pazar verilerinin ${data.decision === 'AL' ? 'pozitif' : 'negatif'} bir eğilim gösterdiğini saptadık. ${data.sorted[0][0]} üzerindeki ${new Intl.NumberFormat('tr-TR').format(data.actualMarketLow)} TL'lik fiyat şu anki altın standarttır."</p>
+                <p>"Öneri: ${data.decision === 'ALMA' ? 'Fiyatların stabilize olmasını bekleyin ve kur dalgalanmalarını takip edin.' : 'Stok durumunu kontrol ederek satın alma işlemini tamamlayın.'}"</p>
+            `;
+            document.getElementById('ai-opinion').innerHTML = opinionHtml;
+
+            // Market List
+            const marketList = document.getElementById('market-list');
+            marketList.innerHTML = data.sorted.map(([name, price], idx) => `
+                <div class="flex items-center justify-between p-4 ${idx === 0 ? 'bg-surface-container-high' : 'bg-surface-container-high/50'} rounded-lg hover:bg-surface-bright transition-all cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center font-bold">${name[0]}</div>
+                        <span class="font-bold">${name}</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-black ${idx === 0 ? 'text-primary-container' : 'text-on-surface-variant'}">${new Intl.NumberFormat('tr-TR').format(price)} TL</div>
+                        <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">${idx === 0 ? 'En İyi Fiyat' : 'İkincil Seçenek'}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Pulse Data
+            document.getElementById('seller-score').innerHTML = `${(8 + Math.random() * 2).toFixed(1)}<span class="text-sm text-on-surface-variant font-medium">/10</span>`;
+            document.getElementById('shipping-speed').innerHTML = `${Math.floor(12 + Math.random() * 36)}<span class="text-sm text-on-surface-variant font-medium"> Saat</span>`;
+            const priceDrop = (Math.random() * 20).toFixed(0);
+            document.getElementById('price-history').innerHTML = `-${priceDrop}% <span class="text-xs font-normal text-on-surface-variant">(30 GÜN)</span>`;
+            document.getElementById('confidence-score').innerText = `${Math.floor(85 + Math.random() * 14)}% Güven Oranı`;
+
+            // Final Display
             spinner.classList.add('hidden');
             icon.classList.remove('hidden');
-            text.innerText = "Analiz Edildi";
-            btn.classList.remove('bg-primary-container');
-            btn.classList.add('bg-surface-container-high');
+            text.innerText = "Yeniden Analiz Et";
+            btn.disabled = false;
+            btn.classList.remove('opacity-80', 'cursor-not-allowed');
             
-            // Show Results with animation
             results.classList.remove('hidden');
             setTimeout(() => {
                 results.classList.add('fade-enter-active');
-                results.scrollIntoView({ behavior: 'smooth' });
+                results.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 50);
-        }, 2000);
+        }, 1500);
     }
 </script>
 </body></html>
