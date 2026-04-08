@@ -86,6 +86,10 @@
       .fade-enter { opacity: 0; transform: translateY(10px); transition: all 0.5s ease-out; }
       .fade-enter-active { opacity: 1; transform: translateY(0); }
       .progress-bar-fill { transition: width 0.3s ease-in-out; }
+      .chart-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw 2s ease-out forwards; }
+      @keyframes draw { to { stroke-dashoffset: 0; } }
+      .scanning-line { height: 2px; background: #00FF41; box-shadow: 0 0 15px #00FF41; position: absolute; width: 100%; z-index: 20; top: 0; animation: scan 2s linear infinite; }
+      @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
@@ -138,15 +142,19 @@
 <label class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 font-bold">GÜNCEL FİYAT (TL)</label>
 <input class="bg-transparent border-none p-0 text-3xl font-bold text-primary-container focus:ring-0 placeholder:text-surface-container-high" id="price-input" placeholder="Fiyat Giriniz" type="number"/>
 </div>
-<div class="relative h-48 bg-surface-container-low rounded-xl overflow-hidden cursor-pointer group outline-dashed outline-2 outline-outline-variant/30 hover:outline-primary-container/50 transition-all" onclick="document.getElementById('file-upload').click()">
+<div class="relative h-48 bg-surface-container-low rounded-xl overflow-hidden cursor-pointer group outline-dashed outline-2 outline-outline-variant/30 hover:outline-primary-container/50 transition-all" id="drop-zone" onclick="document.getElementById('file-upload').click()">
 <input accept="image/*" class="hidden-input" id="file-upload" onchange="handleFileUpload(event)" type="file"/>
 <video autoplay="" class="hidden" id="video-preview" playsinline=""></video>
 <img class="hidden" id="image-preview"/>
+<div class="hidden absolute inset-0 pointer-events-none overflow-hidden" id="scanning-effect">
+<div class="scanning-line"></div>
+<div class="absolute inset-0 bg-primary-container/5"></div>
+</div>
 <div class="absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant group-hover:text-primary-container transition-colors" id="drop-zone-content">
 <span class="material-symbols-outlined text-4xl mb-2" id="camera-icon" style="font-variation-settings: 'FILL' 0;">photo_camera</span>
-<span class="text-xs font-bold tracking-widest uppercase" id="upload-text">Fotoğraf Yükle veya Sürükle</span>
+<span class="text-xs font-bold tracking-widest uppercase" id="upload-text">Görsel Tanıma İçin Fotoğraf Yükle</span>
 </div>
-<button class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-container px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest z-10 hover:scale-105 active:scale-95 transition-all" id="capture-btn" onclick="captureImage(event)">Fotoğrafı Çek</button>
+<button class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-container px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest z-10 hover:scale-105 active:scale-95 transition-all" id="capture-btn" onclick="captureImage(event)">Görüntüyü Yakala</button>
 </div>
 </div>
 <div class="flex flex-col gap-4">
@@ -206,6 +214,23 @@
 <span class="material-symbols-outlined text-sm">travel_explore</span> Pazar Analizi &amp; Doğrudan Linkler
                         </h3>
 <div class="space-y-4" id="market-list"></div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-8">
+<h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">show_chart</span> Fiyat Geçmişi &amp; Grafik Analizi
+    </h3>
+<div class="h-48 w-full relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 100">
+<path class="chart-line" d="M0 80 Q 50 70, 100 85 T 200 60 T 300 90 T 400 50" fill="none" id="price-chart-path" stroke="#00FF41" stroke-width="2"></path>
+<circle cx="400" cy="50" fill="#00FF41" r="4"></circle>
+</svg>
+<div class="absolute inset-0 flex justify-between items-end text-[8px] font-bold text-on-surface-variant/40 pt-10 uppercase tracking-tighter">
+<span>30 GÜN ÖNCE</span>
+<span>15 GÜN ÖNCE</span>
+<span>BUGÜN</span>
+</div>
+</div>
+<p class="mt-4 text-xs font-medium text-on-surface-variant leading-relaxed italic" id="chart-insight">Yapay zeka: Bu grafik son 7 gündeki düşüşün gerçek bir kampanya olduğunu doğruluyor.</p>
 </div>
 <div class="bg-surface-container-low rounded-xl p-8">
 <h3 class="text-xs font-black uppercase tracking-widest text-on-surface-variant mb-6 flex items-center gap-2">
@@ -276,7 +301,8 @@
         'iphone': { min: 45000, max: 85000, category: 'Teknoloji', name: 'iPhone 15 Pro Max' },
         'macbook': { min: 38000, max: 120000, category: 'Teknoloji', name: 'Apple MacBook Pro M3' },
         'tshirt': { min: 150, max: 850, category: 'Giyim', name: 'Premium Pamuklu T-shirt' },
-        'ayakkabı': { min: 1200, max: 4500, category: 'Giyim', name: 'Nike Air Max' },
+        'ayakkabı': { min: 1200, max: 4500, category: 'Giyim', name: 'Adidas Terrex AX4 Black' },
+        'shoe': { min: 1200, max: 4500, category: 'Giyim', name: 'Adidas Terrex AX4 Black' },
         'laptop': { min: 12000, max: 45000, category: 'Teknoloji', name: 'Yüksek Performanslı Laptop' },
         'kitap': { min: 50, max: 250, category: 'Medya', name: 'Bestseller Roman' }
     };
@@ -295,9 +321,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 showPreview(e.target.result);
-                const input = document.getElementById('product-input');
-                if (!input.value) input.value = "Tanımlanan Ürün";
-                startAnalysis();
+                simulateVisualRecognition();
             };
             reader.readAsDataURL(file);
         }
@@ -313,6 +337,30 @@
         video.classList.add('hidden');
         content.classList.add('hidden');
         captureBtn.classList.add('hidden');
+    }
+
+    async function simulateVisualRecognition() {
+        const scanner = document.getElementById('scanning-effect');
+        const input = document.getElementById('product-input');
+        const uploadText = document.getElementById('upload-text');
+        
+        scanner.classList.remove('hidden');
+        uploadText.innerText = "Model Tanımlanıyor...";
+        
+        // Brief delay for visual recognition effect
+        await new Promise(r => setTimeout(r, 2000));
+        
+        scanner.classList.add('hidden');
+        const identifiedName = "Adidas Terrex AX4 Black"; // Simulation: identify as this model
+        input.value = identifiedName;
+        uploadText.innerText = "Tanımlanan Model: " + identifiedName;
+        
+        // Auto start analysis if price is present
+        if(document.getElementById('price-input').value) {
+            startAnalysis();
+        } else {
+            document.getElementById('price-input').focus();
+        }
     }
 
     async function simulateCamera() {
@@ -346,9 +394,7 @@
         const dataUrl = canvas.toDataURL('image/jpeg');
         if (video.srcObject) video.srcObject.getTracks().forEach(track => track.stop());
         showPreview(dataUrl);
-        const input = document.getElementById('product-input');
-        if (!input.value) input.value = "Kamera ile Çekilen Ürün";
-        startAnalysis();
+        simulateVisualRecognition();
     }
 
     function generateAnalysisData(userInput, userPrice) {
@@ -378,7 +424,6 @@
         const actualMarketLow = sorted[0][1];
         const cheapestStore = sorted[0][0];
         
-        // Consumer Analysis Logic
         const lowest30Days = actualMarketLow * (0.9 + Math.random() * 0.2);
         const inflationRate = ((userPrice - lowest30Days) / lowest30Days) * 100;
         const sellerScore = (7.5 + Math.random() * 2.4).toFixed(1);
@@ -415,7 +460,6 @@
         }
 
         const btn = document.getElementById('analyze-btn');
-        const text = document.getElementById('analyze-text');
         const results = document.getElementById('results-section');
         const progressContainer = document.getElementById('progress-container');
         const progressBar = document.getElementById('progress-bar');
@@ -427,9 +471,9 @@
         results.classList.add('hidden');
         
         const steps = [
-            { p: 20, s: 'Pazar yerleri taranıyor...' },
-            { p: 50, s: 'Fiyat geçmişi kontrol ediliyor...' },
-            { p: 80, s: 'Satıcı puanları analiz ediliyor...' },
+            { p: 25, s: 'Görsel veriler işleniyor...' },
+            { p: 50, s: 'Ürün modeli doğrulanıyor...' },
+            { p: 75, s: 'Pazar verileri ve geçmiş taranıyor...' },
             { p: 100, s: 'Analiz tamamlandı.' }
         ];
 
@@ -445,7 +489,7 @@
                 clearInterval(interval);
                 renderResults(generateAnalysisData(userInput, userPrice));
             }
-        }, 800);
+        }, 600);
     }
 
     function renderResults(data) {
@@ -460,7 +504,7 @@
             document.getElementById('verdict-description').innerText = "Fiyat manipülasyonu tespiti: Girdiğiniz fiyat piyasa normlarının %15 üzerinde.";
         } else {
             manipulationAlert.classList.add('hidden');
-            document.getElementById('verdict-description').innerText = `Veri doğrulandı. ${data.cheapestStore} üzerinde en iyi fiyat aktif durumda.`;
+            document.getElementById('verdict-description').innerText = `Veri doğrulandı. ${data.productName} için ${data.cheapestStore} üzerinde en iyi fiyat aktif.`;
         }
 
         const searchKeyword = encodeURIComponent(data.productName);
@@ -468,14 +512,13 @@
         bestOfferCta.innerHTML = `
             <a href="${marketSearchUrls[data.cheapestStore] || 'https://www.google.com/search?q='}${searchKeyword}" target="_blank" class="w-full inline-flex items-center justify-between bg-primary-container text-on-primary-container px-6 py-4 rounded-xl font-black uppercase tracking-tight hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_40px_rgba(0,255,65,0.2)]">
                 <div class="flex flex-col items-start">
-                    <span class="text-[10px] opacity-70">DOĞRUDAN ÜRÜN ARA</span>
-                    <span>${data.cheapestStore}'YA GİT</span>
+                    <span class="text-[10px] opacity-70">DOĞRUDAN MAĞAZAYA GİT</span>
+                    <span>${data.cheapestStore}'DA İNCELE</span>
                 </div>
                 <span class="material-symbols-outlined">open_in_new</span>
             </a>
         `;
 
-        // Consumer Section Updates
         document.getElementById('real-discount-val').innerText = `${Math.abs(data.inflationRate).toFixed(1)}%`;
         const inflationBadge = document.getElementById('inflation-badge');
         if (data.inflationRate > 5) {
@@ -491,14 +534,17 @@
         document.getElementById('reliability-bar').style.width = (data.sellerScore * 10) + '%';
         document.getElementById('stock-prediction').innerText = data.decision === 'AL' ? 'Kritik ( < 24 Saat )' : 'Stabil ( > 7 Gün )';
 
-        // Opinion section (cold data approach)
+        // Custom AI opinion mentioning the model
         const opinionHtml = `
             <p>> Sinyal: ${data.isManipulated ? 'NEGATİF_MANİPÜLASYON' : 'POZİTİF_FİYAT_UYUMU'}</p>
-            <p>> Veri Kaynağı: 5 ana pazar yeri, 120+ satıcı indeksi.</p>
-            <p>> Karşılaştırma: Mevcut fiyat vs 30G regresyon analizi.</p>
-            <p>> Bulgular: ${data.cheapestStore} fiyatı pazar ortalamasının %${((1 - data.actualMarketLow / (data.actualMarketLow * 1.1)) * 100).toFixed(1)} altında. ${data.isManipulated ? 'Fiyat manipülasyonu tespiti nedeniyle satın alma önerilmez.' : 'İstatistiksel olarak en düşük fiyat bölgesinde.'}</p>
+            <p>> Model: ${data.productName} modelini analiz ettim.</p>
+            <p>> Bulgular: ${data.cheapestStore} fiyatı pazar ortalamasının %${((1 - data.actualMarketLow / (data.actualMarketLow * 1.1)) * 100).toFixed(1)} altında. ${data.isManipulated ? 'Fiyat geçmişi tutarsızlığı nedeniyle satın alma önerilmez.' : 'İstatistiksel olarak en düşük fiyat bölgesinde.'}</p>
+            <p>> Karşılaştırma: Mevcut fiyat vs 30 günlük regresyon analizi tamamlandı.</p>
         `;
         document.getElementById('ai-opinion').innerHTML = opinionHtml;
+
+        const chartInsight = document.getElementById('chart-insight');
+        chartInsight.innerText = data.isManipulated ? "Yapay zeka: Dikkat! Grafik son 48 saatteki yapay fiyat artışını gösteriyor." : "Yapay zeka: Bu grafik son 30 gündeki en sağlıklı fiyat bölgesinde olduğumuzu gösteriyor.";
 
         const marketList = document.getElementById('market-list');
         marketList.innerHTML = data.sorted.map(([name, price], idx) => {
