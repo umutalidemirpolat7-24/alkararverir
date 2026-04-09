@@ -7,7 +7,6 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -88,6 +87,17 @@
       .mesh-glow {
         background: radial-gradient(circle at 50% 50%, rgba(0, 255, 65, 0.15) 0%, transparent 70%);
       }
+      @keyframes scan {
+        0% { transform: translateY(-100%); opacity: 0; }
+        50% { opacity: 1; }
+        100% { transform: translateY(100%); opacity: 0; }
+      }
+      .scanner-line {
+        height: 2px;
+        background: #00FF41;
+        box-shadow: 0 0 15px #00FF41;
+        animation: scan 2s linear infinite;
+      }
     </style>
 </head>
 <body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
@@ -106,8 +116,8 @@
 </div>
 </nav>
 <main class="pt-32 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto min-h-screen">
-<!-- Hero Section: Input and Analysis -->
-<section class="relative mb-20">
+<!-- Hero Section -->
+<section class="relative mb-12">
 <div class="mesh-glow absolute -inset-20 z-0"></div>
 <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
 <div class="lg:col-span-8 space-y-6">
@@ -115,18 +125,18 @@
                         HARCAMADAN ÖNCE <br/> <span class="text-primary-container">DÜŞÜN.</span>
 </h1>
 <div class="flex flex-col md:flex-row gap-4">
-<div class="flex-1 bg-surface-container-lowest rounded-xl p-2 flex items-center gap-4 focus-within:ring-2 ring-primary-fixed transition-all">
+<div class="flex-1 bg-surface-container-lowest rounded-xl p-2 flex items-center gap-4 focus-within:ring-2 ring-primary-fixed transition-all border border-outline-variant/10">
 <span class="material-symbols-outlined text-outline ml-4">search</span>
-<input class="bg-transparent border-none focus:ring-0 text-lg w-full py-4 text-on-surface placeholder:text-outline-variant" placeholder="Ürün adı veya anahtar kelime..." type="text"/>
+<input class="bg-transparent border-none focus:ring-0 text-lg w-full py-4 text-on-surface placeholder:text-outline-variant" id="product-input" placeholder="Ürün adı veya anahtar kelime..." type="text"/>
 </div>
-<div class="md:w-48 bg-surface-container-lowest rounded-xl p-2 flex items-center gap-2 focus-within:ring-2 ring-primary-fixed transition-all">
+<div class="md:w-48 bg-surface-container-lowest rounded-xl p-2 flex items-center gap-2 focus-within:ring-2 ring-primary-fixed transition-all border border-outline-variant/10">
 <span class="text-outline-variant font-bold ml-4">₺</span>
-<input class="bg-transparent border-none focus:ring-0 text-lg w-full py-4 text-on-surface placeholder:text-outline-variant" placeholder="Fiyat" type="number"/>
+<input class="bg-transparent border-none focus:ring-0 text-lg w-full py-4 text-on-surface placeholder:text-outline-variant" id="price-input" placeholder="Fiyat" type="number"/>
 </div>
 </div>
 </div>
 <div class="lg:col-span-4 flex flex-col gap-4">
-<button class="w-full bg-primary-container text-on-primary-container font-black py-6 rounded-xl text-xl uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary-container/20">
+<button class="w-full bg-primary-container text-on-primary-container font-black py-6 rounded-xl text-xl uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary-container/20" id="analyze-btn" onclick="startAnalysis()">
                         ANALİZ ET
                     </button>
 <div class="bg-surface-container-high rounded-xl p-4 flex items-center justify-center gap-3 cursor-pointer hover:bg-surface-bright transition-colors border border-outline-variant/10">
@@ -136,85 +146,99 @@
 </div>
 </div>
 </section>
-<!-- Verdict Section (Active State Simulation) -->
-<section class="mb-20">
-<div class="glass-panel rounded-lg p-12 border border-outline-variant/12 relative overflow-hidden">
-<div class="flex flex-col md:flex-row items-center justify-between gap-12">
-<div class="flex-1 space-y-6">
-<div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-tighter">
-<span class="material-symbols-outlined text-sm">warning</span> Piyasa Uyarısı
-                        </div>
-<h2 class="text-6xl font-black tracking-tighter text-secondary">ALMA!</h2>
-<p class="text-lg text-on-surface-variant max-w-lg leading-relaxed">
-                            Girdiğiniz 1.250 TL fiyat, piyasa ortalamasının (890 TL) <span class="text-secondary font-bold">%40 üzerinde.</span> Bu ürün piyasada daha ucuza bulunabiliyor, paranızı koruyun.
-                        </p>
+<!-- Loading State -->
+<section class="hidden mb-20" id="loading-state">
+<div class="bg-surface-container-lowest rounded-xl p-12 border border-primary-container/20 flex flex-col items-center justify-center space-y-6 relative overflow-hidden">
+<div class="scanner-line absolute w-full top-0 left-0"></div>
+<div class="relative">
+<div class="w-20 h-20 border-4 border-primary-container/20 border-t-primary-container rounded-full animate-spin"></div>
+<span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary-container text-3xl">psychology</span>
 </div>
-<div class="relative group">
-<div class="absolute -inset-4 bg-secondary-container/20 blur-2xl group-hover:bg-secondary-container/30 transition-all"></div>
-<div class="relative w-64 h-64 bg-surface-container-lowest rounded-xl flex items-center justify-center border border-secondary/20">
-<span class="material-symbols-outlined text-[120px] text-secondary">close</span>
-</div>
-</div>
+<div class="text-center">
+<h3 class="text-2xl font-black tracking-tight mb-2">PİYASA ANALİZİ YAPILIYOR</h3>
+<p class="text-on-surface-variant animate-pulse">Gerçek zamanlı fiyat verileri taranıyor...</p>
 </div>
 </div>
 </section>
+<!-- Result Section (Initially Hidden) -->
+<section class="hidden mb-20 transition-all duration-700 opacity-0 translate-y-8" id="results-section">
+<div class="glass-panel rounded-lg p-12 border border-outline-variant/12 relative overflow-hidden mb-12" id="verdict-container">
+<div class="flex flex-col md:flex-row items-center justify-between gap-12">
+<div class="flex-1 space-y-6">
+<div class="inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-tighter" id="verdict-badge">
+<span class="material-symbols-outlined text-sm">info</span> <span id="verdict-tag-text">Piyasa Analizi</span>
+</div>
+<h2 class="text-6xl font-black tracking-tighter" id="verdict-title">BEKLE...</h2>
+<p class="text-lg text-on-surface-variant max-w-lg leading-relaxed" id="verdict-desc">
+                            Veriler işleniyor...
+                        </p>
+</div>
+<div class="relative group">
+<div class="absolute -inset-4 blur-2xl transition-all" id="verdict-glow"></div>
+<div class="relative w-64 h-64 bg-surface-container-lowest rounded-xl flex items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-[120px]" id="verdict-icon">help_outline</span>
+</div>
+</div>
+</div>
+</div>
 <!-- Store Comparison Cards -->
-<div class="mb-20">
+<div id="comparison-section">
 <div class="flex justify-between items-end mb-8">
 <div>
-<span class="text-xs font-bold uppercase tracking-[0.2em] text-primary-container">Gerçek Zamanlı Veri</span>
-<h3 class="text-3xl font-black tracking-tight">MAĞAZA KARŞILAŞTIRMASI</h3>
+<span class="text-xs font-bold uppercase tracking-[0.2em] text-primary-container">MAĞAZA KARŞILAŞTIRMASI</span>
+<h3 class="text-3xl font-black tracking-tight" id="comparison-title">GÜNCEL FİYATLAR</h3>
 </div>
-<div class="text-on-surface-variant text-sm font-medium italic">Son güncelleme: 2 dakika önce</div>
+<div class="text-on-surface-variant text-sm font-medium italic">Son güncelleme: Az önce</div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 <!-- Hepsiburada -->
 <div class="bg-surface-container-low p-6 rounded-lg hover:bg-surface-container-high transition-all group">
 <div class="h-12 flex items-center mb-6">
-<img alt="Hepsiburada" class="h-8 grayscale group-hover:grayscale-0 transition-all" data-alt="Official Hepsiburada marketplace logo in orange and white against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj14Gx8mC_T-9cp8_L0xmTsaZ_aJi2VfveV3Q_0znJ3KWxNCjkj82PeZHwtx6t9Jhi-c29UK1PWNV7rC5939L6wu6eehXWTqM_mZDAhGYI8247tbSzJTNvrP3evDvjxy8Rb6QWkRsHcJTXMd0HjodHxH09CWp1Elg113ME78hwFeE5ySZzCpaZjN7olomeCxYoX5hzVxTWsjYIUuce-tb_3FmTdNVhKUBH8f5Q_nBPvIqoFdUrJOGVQmxSFSatUVwX0ROJ6LfeauvA"/>
+<img alt="Hepsiburada" class="h-8 grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj14Gx8mC_T-9cp8_L0xmTsaZ_aJi2VfveV3Q_0znJ3KWxNCjkj82PeZHwtx6t9Jhi-c29UK1PWNV7rC5939L6wu6eehXWTqM_mZDAhGYI8247tbSzJTNvrP3evDvjxy8Rb6QWkRsHcJTXMd0HjodHxH09CWp1Elg113ME78hwFeE5ySZzCpaZjN7olomeCxYoX5hzVxTWsjYIUuce-tb_3FmTdNVhKUBH8f5Q_nBPvIqoFdUrJOGVQmxSFSatUVwX0ROJ6LfeauvA"/>
 </div>
 <div class="space-y-1 mb-8">
 <div class="text-xs uppercase font-bold text-outline-variant tracking-wider">Güncel Fiyat</div>
-<div class="text-3xl font-black text-on-surface">899,90 TL</div>
+<div class="text-3xl font-black text-on-surface" id="hb-price">0 TL</div>
 </div>
-<a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="https://www.hepsiburada.com/ara?q=nutella">Mağazaya Git</a>
+<a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" id="hb-link" target="_blank">Mağazaya Git</a>
 </div>
 <!-- Trendyol -->
 <div class="bg-surface-container-low p-6 rounded-lg hover:bg-surface-container-high transition-all group">
 <div class="h-12 flex items-center mb-6">
-<img alt="Trendyol" class="h-8 grayscale group-hover:grayscale-0 transition-all" data-alt="Official Trendyol orange logo on dark minimalist background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdHeRP3rVHw-GZrnyJsmS457N_-9t-Yl-9yhrlHPJ7112XgKCtGkL5rYUCbsVLq7ccz7BWhHEnGki6ATzr3eAkmItbZbhfm2JcTB4xHLMiebuVAvlj6I1izfHqPZhEZr0gJSbjNzw0RLfTrw__EsAbpdAM7JWlhCYdgoTCBODkuTyYeYTlrv0cEsESC5B0leZaM3wp8olZ-PGioEJQsKSkouJMWT4GQAXBBd2wvWJE3X1Mc1EuhJVIXXr51SAbc6bkWBEfil5yNNzh"/>
+<img alt="Trendyol" class="h-8 grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdHeRP3rVHw-GZrnyJsmS457N_-9t-Yl-9yhrlHPJ7112XgKCtGkL5rYUCbsVLq7ccz7BWhHEnGki6ATzr3eAkmItbZbhfm2JcTB4xHLMiebuVAvlj6I1izfHqPZhEZr0gJSbjNzw0RLfTrw__EsAbpdAM7JWlhCYdgoTCBODkuTyYeYTlrv0cEsESC5B0leZaM3wp8olZ-PGioEJQsKSkouJMWT4GQAXBBd2wvWJE3X1Mc1EuhJVIXXr51SAbc6bkWBEfil5yNNzh"/>
 </div>
 <div class="space-y-1 mb-8">
 <div class="text-xs uppercase font-bold text-outline-variant tracking-wider">Güncel Fiyat</div>
-<div class="text-3xl font-black text-on-surface">912,00 TL</div>
+<div class="text-3xl font-black text-on-surface" id="ty-price">0 TL</div>
 </div>
-<a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="https://www.trendyol.com/sr?q=nutella">Mağazaya Git</a>
+<a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" id="ty-link" target="_blank">Mağazaya Git</a>
 </div>
 <!-- Amazon.tr -->
 <div class="bg-surface-container-low p-6 rounded-lg border-2 border-primary-container/20 hover:bg-surface-container-high transition-all group relative">
 <div class="absolute -top-3 left-6 px-3 py-1 bg-primary-container text-on-primary-container text-[10px] font-black uppercase tracking-tighter rounded-full">En İyi Fiyat</div>
 <div class="h-12 flex items-center mb-6">
-<img alt="Amazon" class="h-8 grayscale group-hover:grayscale-0 transition-all" data-alt="Amazon logo with iconic smile arrow in white against dark theme" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmhsct4EMpN8KsEUZ3_o2IJBA0kBHsc75B7n4_zaMgJmOr-zv448IGiDP7qbuHqJu3dE9F7elscCllU79CQoyK2bu6iWNrX1hwskC7aecrEi3Qh3SujkXYQ8QzfGJ_9hhMf3lX0247K9eCkaOq9boBtHJTr3J8DZ06igzjSEYjbZYz6driijX0FbXN8Tju_xTtyNcCS7m4dCKpquSsWOa0Opb91d4N9H3wFRW7nXN_qnVT38VI0zf4iRZsgHT8i5EhegJ9jcqQiZlY"/>
+<img alt="Amazon" class="h-8 grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmhsct4EMpN8KsEUZ3_o2IJBA0kBHsc75B7n4_zaMgJmOr-zv448IGiDP7qbuHqJu3dE9F7elscCllU79CQoyK2bu6iWNrX1hwskC7aecrEi3Qh3SujkXYQ8QzfGJ_9hhMf3lX0247K9eCkaOq9boBtHJTr3J8DZ06igzjSEYjbZYz6driijX0FbXN8Tju_xTtyNcCS7m4dCKpquSsWOa0Opb91d4N9H3wFRW7nXN_qnVT38VI0zf4iRZsgHT8i5EhegJ9jcqQiZlY"/>
 </div>
 <div class="space-y-1 mb-8">
 <div class="text-xs uppercase font-bold text-outline-variant tracking-wider">Güncel Fiyat</div>
-<div class="text-3xl font-black text-primary-fixed">885,50 TL</div>
+<div class="text-3xl font-black text-primary-fixed" id="az-price">0 TL</div>
 </div>
-<a class="block w-full py-3 bg-primary-container text-on-primary-container text-center rounded-full font-bold text-xs uppercase tracking-widest transition-all" href="https://www.amazon.com.tr/s?k=nutella">Mağazaya Git</a>
+<a class="block w-full py-3 bg-primary-container text-on-primary-container text-center rounded-full font-bold text-xs uppercase tracking-widest transition-all" href="#" id="az-link" target="_blank">Mağazaya Git</a>
 </div>
 <!-- N11 -->
 <div class="bg-surface-container-low p-6 rounded-lg hover:bg-surface-container-high transition-all group">
 <div class="h-12 flex items-center mb-6">
-<img alt="N11" class="h-10 grayscale group-hover:grayscale-0 transition-all" data-alt="N11 marketplace logo with ladybug element on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrDWnpOkC-N2S9rE52yj3HtwEi1IlRDE7JJ4Li6JVgSYzSJMZeUo2jtX-JR86oK0D-ZkBVCQFWETBAw1jDNGaaOomepKUS2TfRev68q4CuxfYvHwOr05ChPALPfwHT3DvnJHn0iNM154-RD8KrhJ--rO5In0NdST9iWYOyk7OBeiv97hMCoDD4OEIxgrNlbs681xjYsgeadbt-wEXYfyk6LkPqvHy4uUYy20zhMnJpusxjjCRnbm-DsxKVOfJAJ5WloTT8wde3aKWL"/>
+<img alt="N11" class="h-10 grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrDWnpOkC-N2S9rE52yj3HtwEi1IlRDE7JJ4Li6JVgSYzSJMZeUo2jtX-JR86oK0D-ZkBVCQFWETBAw1jDNGaaOomepKUS2TfRev68q4CuxfYvHwOr05ChPALPfwHT3DvnJHn0iNM154-RD8KrhJ--rO5In0NdST9iWYOyk7OBeiv97hMCoDD4OEIxgrNlbs681xjYsgeadbt-wEXYfyk6LkPqvHy4uUYy20zhMnJpusxjjCRnbm-DsxKVOfJAJ5WloTT8wde3aKWL"/>
 </div>
 <div class="space-y-1 mb-8">
 <div class="text-xs uppercase font-bold text-outline-variant tracking-wider">Güncel Fiyat</div>
-<div class="text-3xl font-black text-on-surface">945,00 TL</div>
+<div class="text-3xl font-black text-on-surface" id="n11-price">0 TL</div>
 </div>
-<a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="https://www.n11.com/arama?q=nutella">Mağazaya Git</a>
+<a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" id="n11-link" target="_blank">Mağazaya Git</a>
 </div>
 </div>
 </div>
+</section>
 <!-- Consumer Awareness Section -->
 <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 <div class="bg-surface-container-lowest p-10 rounded-xl space-y-6">
@@ -228,7 +252,7 @@
                     Satıcılar genellikle 'İndirim' etiketi yapıştırmadan önce fiyatları yükseltir. AL MI?, ürünün son 3 aylık fiyat geçmişini analiz ederek indirimin gerçekliğini denetler. Eğer grafik yapay bir artış gösteriyorsa, sizi uyarırız.
                 </p>
 <div class="pt-4">
-<img alt="Fiyat Grafiği" class="w-full h-32 object-cover rounded-lg opacity-60" data-alt="Sleek neon green line chart showing price fluctuations over time on a dark tech-inspired background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBj6JoFzbZJNCsW4Soi9kVc1L3hkAdwR1bZ4Myi4zL0kcpLUmIcSikpkP1OmjqyCr1jIhV5E8u88tSoQPsHYqUadmOUywNtgqsmcDeRkl-GGpkqoP9u5gSqw13bNHn1xRPQ5F2Q0fZcBxNHslGwL9Rlo1lUXAyrcChgvaq422BYez48rl07CcQ8a7Qfe5lx8i9aX7wttrxHqC0uC4Mopcwc2_Zm4hsB5ZTA0xNWAUG_XGQCoJB44ZTI-kPcsVoeZLNPLgXm4p30NBJj"/>
+<img alt="Fiyat Grafiği" class="w-full h-32 object-cover rounded-lg opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBj6JoFzbZJNCsW4Soi9kVc1L3hkAdwR1bZ4Myi4zL0kcpLUmIcSikpkP1OmjqyCr1jIhV5E8u88tSoQPsHYqUadmOUywNtgqsmcDeRkl-GGpkqoP9u5gSqw13bNHn1xRPQ5F2Q0fZcBxNHslGwL9Rlo1lUXAyrcChgvaq422BYez48rl07CcQ8a7Qfe5lx8i9aX7wttrxHqC0uC4Mopcwc2_Zm4hsB5ZTA0xNWAUG_XGQCoJB44ZTI-kPcsVoeZLNPLgXm4p30NBJj"/>
 </div>
 </div>
 <div class="bg-surface-container-lowest p-10 rounded-xl space-y-6">
@@ -267,4 +291,101 @@
 </div>
 </div>
 </footer>
+<script>
+        function startAnalysis() {
+            const productInput = document.getElementById('product-input').value;
+            const priceInput = parseFloat(document.getElementById('price-input').value);
+
+            if (!productInput) {
+                alert("Lütfen bir ürün adı girin.");
+                return;
+            }
+
+            // Hide results, show loading
+            document.getElementById('results-section').classList.add('hidden', 'opacity-0', 'translate-y-8');
+            document.getElementById('loading-state').classList.remove('hidden');
+            
+            // Simulate 2.5s AI scanning
+            setTimeout(() => {
+                performAnalysis(productInput, priceInput);
+            }, 2500);
+        }
+
+        function performAnalysis(product, userPrice) {
+            document.getElementById('loading-state').classList.add('hidden');
+            const results = document.getElementById('results-section');
+            results.classList.remove('hidden');
+            
+            // Trigger animation
+            setTimeout(() => {
+                results.classList.remove('opacity-0', 'translate-y-8');
+            }, 10);
+
+            // Update Search Links
+            const encodedProduct = encodeURIComponent(product);
+            document.getElementById('hb-link').href = `https://www.hepsiburada.com/ara?q=${encodedProduct}`;
+            document.getElementById('ty-link').href = `https://www.trendyol.com/sr?q=${encodedProduct}`;
+            document.getElementById('az-link').href = `https://www.amazon.com.tr/s?k=${encodedProduct}`;
+            document.getElementById('n11-link').href = `https://www.n11.com/arama?q=${encodedProduct}`;
+
+            // Simulate market prices based on product type or generic range
+            // For demo: product "Nutella" usually 100TL, product "Yazıcı" usually 5000TL
+            let marketAvg = 0;
+            if (product.toLowerCase().includes('yazıcı') || product.toLowerCase().includes('printer')) {
+                marketAvg = 8500;
+            } else if (product.toLowerCase().includes('nutella')) {
+                marketAvg = 120;
+            } else {
+                marketAvg = userPrice ? userPrice * 0.9 : 1000; // Default fallback logic
+            }
+
+            const p1 = (marketAvg * 1.05).toFixed(2);
+            const p2 = (marketAvg * 1.02).toFixed(2);
+            const p3 = (marketAvg * 0.95).toFixed(2); // Best price
+            const p4 = (marketAvg * 1.1).toFixed(2);
+
+            document.getElementById('hb-price').innerText = p1 + ' TL';
+            document.getElementById('ty-price').innerText = p2 + ' TL';
+            document.getElementById('az-price').innerText = p3 + ' TL';
+            document.getElementById('n11-price').innerText = p4 + ' TL';
+
+            const bestPrice = parseFloat(p3);
+            const verdictTitle = document.getElementById('verdict-title');
+            const verdictDesc = document.getElementById('verdict-desc');
+            const verdictBadge = document.getElementById('verdict-badge');
+            const verdictGlow = document.getElementById('verdict-glow');
+            const verdictIcon = document.getElementById('verdict-icon');
+
+            if (userPrice > bestPrice * 1.25) {
+                // High price warning - ALMA
+                verdictTitle.innerText = "ALMA!";
+                verdictTitle.className = "text-6xl font-black tracking-tighter text-secondary";
+                verdictDesc.innerHTML = `Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> fiyat, piyasanın en iyi teklifinden (<strong>${bestPrice.toLocaleString()} TL</strong>) oldukça yüksek. Paranızı koruyun, bu ürünü piyasada daha ucuza bulabilirsiniz.`;
+                verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-tighter";
+                verdictIcon.innerText = "close";
+                verdictIcon.className = "material-symbols-outlined text-[120px] text-secondary";
+                verdictGlow.className = "absolute -inset-4 bg-secondary-container/20 blur-2xl";
+            } else if (userPrice <= bestPrice * 1.05) {
+                // Good price - AL
+                verdictTitle.innerText = "AL!";
+                verdictTitle.className = "text-6xl font-black tracking-tighter text-primary-container";
+                verdictDesc.innerHTML = `Harika bir fırsat! Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> fiyat, piyasa ortalamasıyla uyumlu ve güvenli bir alım bölgesi.`;
+                verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-primary-container/20 text-primary-container text-xs font-bold uppercase tracking-tighter";
+                verdictIcon.innerText = "check";
+                verdictIcon.className = "material-symbols-outlined text-[120px] text-primary-container";
+                verdictGlow.className = "absolute -inset-4 bg-primary-container/10 blur-2xl";
+            } else {
+                // Wait - BEKLE
+                verdictTitle.innerText = "BEKLE!";
+                verdictTitle.className = "text-6xl font-black tracking-tighter text-tertiary-fixed-dim";
+                verdictDesc.innerHTML = `Daha iyi bir fırsat yakalayabilirsiniz. Mevcut en iyi fiyat <strong>${bestPrice.toLocaleString()} TL</strong> iken girdiğiniz fiyat biraz yüksek kalıyor.`;
+                verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-tertiary-fixed/10 text-tertiary-fixed-dim text-xs font-bold uppercase tracking-tighter";
+                verdictIcon.innerText = "pause";
+                verdictIcon.className = "material-symbols-outlined text-[120px] text-tertiary-fixed-dim";
+                verdictGlow.className = "absolute -inset-4 bg-tertiary-fixed/5 blur-2xl";
+            }
+            
+            document.getElementById('comparison-title').innerText = `${product.toUpperCase()} FİYATLARI`;
+        }
+    </script>
 </body></html>
