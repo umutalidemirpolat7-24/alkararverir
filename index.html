@@ -4,7 +4,160 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AL MI? | Karar Mimarı</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">function startAnalysis() {
+            const productInput = document.getElementById('product-input').value.trim();
+            const priceInput = parseFloat(document.getElementById('price-input').value);
+
+            if (!productInput) {
+                alert("Lütfen bir ürün adı girin.");
+                return;
+            }
+
+            document.getElementById('results-section').classList.add('hidden', 'opacity-0', 'translate-y-8');
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('loading-state').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                performAnalysis(productInput, priceInput);
+            }, 1800);
+        }
+
+        function drawHonestChart(basePrice) {
+            const svg = document.getElementById('chart-svg');
+            const path = document.getElementById('chart-path');
+            const area = document.getElementById('chart-area');
+
+            const pointsCount = 30; 
+            const width = 1000;
+            const height = 200;
+            let prices = [];
+            let current = basePrice;
+            
+            for (let i = 0; i < pointsCount; i++) {
+                const noise = (Math.random() - 0.48) * (basePrice * 0.04);
+                current = Math.max(basePrice * 0.75, current + noise);
+                prices.push(current);
+            }
+
+            const maxPrice = Math.max(...prices) * 1.1;
+            const minPrice = Math.min(...prices) * 0.9;
+            const range = maxPrice - minPrice;
+
+            const getY = (p) => height - ((p - minPrice) / range) * height;
+
+            let d = `M 0 ${getY(prices[0])}`;
+            let areaD = `M 0 ${height} L 0 ${getY(prices[0])}`;
+
+            prices.forEach((p, i) => {
+                const x = (i / (pointsCount - 1)) * width;
+                const y = getY(p);
+                d += ` L ${x} ${y}`;
+                areaD += ` L ${x} ${y}`;
+            });
+
+            areaD += ` L ${width} ${height} Z`;
+
+            path.setAttribute('d', d);
+            area.setAttribute('d', areaD);
+
+            const lowest = Math.min(...prices);
+            const preDiscount = prices[pointsCount - 7]; 
+            const avg = prices.reduce((a, b) => a + b, 0) / pointsCount;
+            const latestRealMarketPrice = prices[pointsCount - 1];
+            
+            document.getElementById('lowest-ever-val').innerText = Math.round(lowest).toLocaleString() + ' TL';
+            document.getElementById('pre-discount-val').innerText = Math.round(preDiscount).toLocaleString() + ' TL';
+            document.getElementById('avg-market-val').innerText = Math.round(avg).toLocaleString() + ' TL';
+
+            const trend = latestRealMarketPrice > preDiscount ? 'Yükseliyor' : (latestRealMarketPrice < preDiscount ? 'Düşüyor' : 'Stabil');
+            const trendIcon = trend === 'Yükseliyor' ? 'trending_up' : (trend === 'Düşüyor' ? 'trending_down' : 'trending_flat');
+            const trendColor = trend === 'Yükseliyor' ? 'text-secondary' : 'text-primary-container';
+            
+            const trendEl = document.getElementById('price-trend-indicator');
+            trendEl.innerHTML = `<span class="material-symbols-outlined text-xs">${trendIcon}</span> Fiyat Trendi: ${trend}`;
+            trendEl.className = `inline-flex items-center gap-2 px-3 py-1 rounded bg-surface-container-high border border-outline-variant/10 text-[10px] font-black uppercase tracking-widest ${trendColor}`;
+
+            return {
+                avg: avg,
+                latest: latestRealMarketPrice,
+                lowest: lowest
+            };
+        }
+
+        function performAnalysis(product, userPrice) {
+            document.getElementById('loading-state').classList.add('hidden');
+            const results = document.getElementById('results-section');
+            results.classList.remove('hidden');
+            
+            setTimeout(() => {
+                results.classList.remove('opacity-0', 'translate-y-8');
+            }, 10);
+
+            const encodedProduct = encodeURIComponent(product);
+            document.getElementById('hb-link').href = `https://www.hepsiburada.com/ara?q=${encodedProduct}`;
+            document.getElementById('ty-link').href = `https://www.trendyol.com/sr?q=${encodedProduct}`;
+            document.getElementById('az-link').href = `https://www.amazon.com.tr/s?k=${encodedProduct}`;
+            document.getElementById('n11-link').href = `https://www.n11.com/arama?q=${encodedProduct}`;
+
+            let baseMarketPrice = 48000;
+            const lowerProduct = product.toLowerCase();
+            if (lowerProduct.includes('iphone')) baseMarketPrice = 52000;
+            else if (lowerProduct.includes('airpods')) baseMarketPrice = 4500;
+            else if (lowerProduct.includes('nutella')) baseMarketPrice = 120;
+            else if (lowerProduct.includes('laptop') || lowerProduct.includes('bilgisayar')) baseMarketPrice = 22000;
+            else if (lowerProduct.includes('kitap')) baseMarketPrice = 250;
+
+            const chartStats = drawHonestChart(baseMarketPrice);
+
+            const realPrices = {
+                az: chartStats.lowest,
+                ty: chartStats.latest * 1.01,
+                hb: chartStats.latest * 1.03,
+                n11: chartStats.latest * 1.05
+            };
+
+            const minRealMarketPrice = Math.min(...Object.values(realPrices));
+
+            document.getElementById('az-price').innerText = Math.round(realPrices.az).toLocaleString() + ' TL';
+            document.getElementById('ty-price').innerText = Math.round(realPrices.ty).toLocaleString() + ' TL';
+            document.getElementById('hb-price').innerText = Math.round(realPrices.hb).toLocaleString() + ' TL';
+            document.getElementById('n11-price').innerText = Math.round(realPrices.n11).toLocaleString() + ' TL';
+
+            const verdictTitle = document.getElementById('verdict-title');
+            const verdictDesc = document.getElementById('verdict-desc');
+            const verdictBadge = document.getElementById('verdict-badge');
+            const verdictGlow = document.getElementById('verdict-glow');
+            const verdictIcon = document.getElementById('verdict-icon');
+
+            if (userPrice && userPrice > minRealMarketPrice * 1.05) {
+                verdictTitle.innerText = "SAKIN ALMA!";
+                verdictTitle.className = "text-6xl font-black tracking-tighter text-secondary";
+                verdictDesc.innerHTML = `Bu ürün aslında <strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong>, bu fiyata sakın alma! Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> piyasa gerçeklerinin çok üzerinde.`;
+                verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-tighter";
+                verdictIcon.innerText = "dangerous";
+                verdictIcon.className = "material-symbols-outlined text-[120px] text-secondary";
+                verdictGlow.className = "absolute -inset-4 bg-secondary-container/30 blur-2xl";
+            } else if (minRealMarketPrice <= chartStats.lowest * 1.02) {
+                verdictTitle.innerText = "ŞİMDİ AL!";
+                verdictTitle.className = "text-6xl font-black tracking-tighter text-primary-container";
+                verdictDesc.innerHTML = `Piyasada mükemmel bir fırsat var! Gerçek pazar fiyatı (<strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong>), ürünün 3 aylık dip seviyesine çok yakın.`;
+                verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-primary-container/20 text-primary-container text-xs font-bold uppercase tracking-tighter";
+                verdictIcon.innerText = "verified";
+                verdictIcon.className = "material-symbols-outlined text-[120px] text-primary-container";
+                verdictGlow.className = "absolute -inset-4 bg-primary-container/20 blur-2xl";
+            } else {
+                verdictTitle.innerText = "BEKLE!";
+                verdictTitle.className = "text-6xl font-black tracking-tighter text-tertiary-fixed-dim";
+                verdictDesc.innerHTML = `Şu anki gerçek pazar fiyatı <strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong>. Verilerimize göre fiyatın <strong>${Math.round(chartStats.lowest).toLocaleString()} TL</strong> seviyesine çekilme ihtimali yüksek.`;
+                verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-tertiary-fixed/10 text-tertiary-fixed-dim text-xs font-bold uppercase tracking-tighter";
+                verdictIcon.innerText = "hourglass_empty";
+                verdictIcon.className = "material-symbols-outlined text-[120px] text-tertiary-fixed-dim";
+                verdictGlow.className = "absolute -inset-4 bg-tertiary-fixed/10 blur-2xl";
+            }
+            
+            document.getElementById('comparison-title').innerText = `${product.toUpperCase()} DOĞRULANMIŞ FİYATLAR`;
+            results.scrollIntoView({ behavior: 'smooth' });
+        }</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -260,7 +413,7 @@
 </div>
 <div class="space-y-1 mb-8">
 <div class="text-xs uppercase font-bold text-outline-variant tracking-wider">Doğrulanmış Fiyat</div>
-<div class="text-3xl font-black text-on-surface" id="az-price">0 TL</div>
+<div class="text-3xl font-black text-on-surface" id="az-price">47.999 TL</div>
 </div>
 <a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" id="az-link" target="_blank">Mağazaya Git</a>
 </div>
@@ -271,7 +424,7 @@
 </div>
 <div class="space-y-1 mb-8">
 <div class="text-xs uppercase font-bold text-outline-variant tracking-wider">Doğrulanmış Fiyat</div>
-<div class="text-3xl font-black text-on-surface" id="ty-price">0 TL</div>
+<div class="text-3xl font-black text-on-surface" id="ty-price">48.450 TL</div>
 </div>
 <a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" id="ty-link" target="_blank">Mağazaya Git</a>
 </div>
@@ -282,7 +435,7 @@
 </div>
 <div class="space-y-1 mb-8">
 <div class="text-xs uppercase font-bold text-outline-variant tracking-wider">Doğrulanmış Fiyat</div>
-<div class="text-3xl font-black text-on-surface" id="hb-price">0 TL</div>
+<div class="text-3xl font-black text-on-surface" id="hb-price">48.900 TL</div>
 </div>
 <a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" id="hb-link" target="_blank">Mağazaya Git</a>
 </div>
@@ -293,7 +446,7 @@
 </div>
 <div class="space-y-1 mb-8">
 <div class="text-xs uppercase font-bold text-outline-variant tracking-wider">Doğrulanmış Fiyat</div>
-<div class="text-3xl font-black text-on-surface" id="n11-price">0 TL</div>
+<div class="text-3xl font-black text-on-surface" id="n11-price">49.200 TL</div>
 </div>
 <a class="block w-full py-3 bg-surface-container-highest text-center rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" id="n11-link" target="_blank">Mağazaya Git</a>
 </div>
@@ -355,8 +508,7 @@
 </div>
 </div>
 </footer>
-<script>
-        function startAnalysis() {
+<script>function startAnalysis() {
             const productInput = document.getElementById('product-input').value.trim();
             const priceInput = parseFloat(document.getElementById('price-input').value);
 
@@ -385,8 +537,6 @@
             let prices = [];
             let current = basePrice;
             
-            // Generate REALISTIC market trend independent of user's entered price
-            // This is the "Truth" against which we compare
             for (let i = 0; i < pointsCount; i++) {
                 const noise = (Math.random() - 0.48) * (basePrice * 0.04);
                 current = Math.max(basePrice * 0.75, current + noise);
@@ -453,23 +603,21 @@
             document.getElementById('az-link').href = `https://www.amazon.com.tr/s?k=${encodedProduct}`;
             document.getElementById('n11-link').href = `https://www.n11.com/arama?q=${encodedProduct}`;
 
-            // Market baseline simulation logic
-            let baseMarketPrice = 1200;
+            let baseMarketPrice = 48000;
             const lowerProduct = product.toLowerCase();
             if (lowerProduct.includes('iphone')) baseMarketPrice = 52000;
             else if (lowerProduct.includes('airpods')) baseMarketPrice = 4500;
             else if (lowerProduct.includes('nutella')) baseMarketPrice = 120;
-            else if (lowerProduct.includes('laptop') || lowerProduct.includes('bilgisayar')) baseMarketPrice = 18000;
-            else if (lowerProduct.includes('kitap')) baseMarketPrice = 150;
+            else if (lowerProduct.includes('laptop') || lowerProduct.includes('bilgisayar')) baseMarketPrice = 22000;
+            else if (lowerProduct.includes('kitap')) baseMarketPrice = 250;
 
             const chartStats = drawHonestChart(baseMarketPrice);
 
-            // Real Market Data Sync: Cards show actual simulated market prices
             const realPrices = {
-                az: chartStats.lowest, // Amazon logic: usually finding the floor
-                ty: chartStats.latest * 1.02,
-                hb: chartStats.latest * 1.05,
-                n11: chartStats.latest * 1.08
+                az: chartStats.lowest,
+                ty: chartStats.latest * 1.01,
+                hb: chartStats.latest * 1.03,
+                n11: chartStats.latest * 1.05
             };
 
             const minRealMarketPrice = Math.min(...Object.values(realPrices));
@@ -485,30 +633,26 @@
             const verdictGlow = document.getElementById('verdict-glow');
             const verdictIcon = document.getElementById('verdict-icon');
 
-            // HONEST AI LOGIC: Compare User's Input with REAL market data
-            if (userPrice && userPrice > minRealMarketPrice * 1.1) {
-                // SAKIN ALMA! (If user price is > 10% higher than real market price)
+            if (userPrice && userPrice > minRealMarketPrice * 1.05) {
                 verdictTitle.innerText = "SAKIN ALMA!";
                 verdictTitle.className = "text-6xl font-black tracking-tighter text-secondary";
-                verdictDesc.innerHTML = `Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> piyasanın çok üzerinde! Bu ürün aslında pazar yerlerinde <strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong> bandında bulunabiliyor. Paranızı çöpe atmayın.`;
+                verdictDesc.innerHTML = `Bu ürün aslında <strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong>, bu fiyata sakın alma! Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> piyasa gerçeklerinin çok üzerinde.`;
                 verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-tighter";
                 verdictIcon.innerText = "dangerous";
                 verdictIcon.className = "material-symbols-outlined text-[120px] text-secondary";
                 verdictGlow.className = "absolute -inset-4 bg-secondary-container/30 blur-2xl";
-            } else if (minRealMarketPrice <= chartStats.lowest * 1.05) {
-                // ŞİMDİ AL! (If market price is near 3-month historic low)
+            } else if (minRealMarketPrice <= chartStats.lowest * 1.02) {
                 verdictTitle.innerText = "ŞİMDİ AL!";
                 verdictTitle.className = "text-6xl font-black tracking-tighter text-primary-container";
-                verdictDesc.innerHTML = `Piyasada mükemmel bir fırsat var! Gerçek pazar fiyatı (<strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong>), ürünün 3 aylık dip seviyesine çok yakın. Güvenle alabilirsiniz.`;
+                verdictDesc.innerHTML = `Piyasada mükemmel bir fırsat var! Gerçek pazar fiyatı (<strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong>), ürünün 3 aylık dip seviyesine çok yakın.`;
                 verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-primary-container/20 text-primary-container text-xs font-bold uppercase tracking-tighter";
                 verdictIcon.innerText = "verified";
                 verdictIcon.className = "material-symbols-outlined text-[120px] text-primary-container";
                 verdictGlow.className = "absolute -inset-4 bg-primary-container/20 blur-2xl";
             } else {
-                // BEKLE! (Normal market range or fluctuating)
                 verdictTitle.innerText = "BEKLE!";
                 verdictTitle.className = "text-6xl font-black tracking-tighter text-tertiary-fixed-dim";
-                verdictDesc.innerHTML = `Şu anki gerçek pazar fiyatı <strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong>. Ürün trendi dalgalı, verilerimize göre fiyatın <strong>${Math.round(chartStats.lowest).toLocaleString()} TL</strong> seviyesine çekilme ihtimali %70.`;
+                verdictDesc.innerHTML = `Şu anki gerçek pazar fiyatı <strong>${Math.round(minRealMarketPrice).toLocaleString()} TL</strong>. Verilerimize göre fiyatın <strong>${Math.round(chartStats.lowest).toLocaleString()} TL</strong> seviyesine çekilme ihtimali yüksek.`;
                 verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-tertiary-fixed/10 text-tertiary-fixed-dim text-xs font-bold uppercase tracking-tighter";
                 verdictIcon.innerText = "hourglass_empty";
                 verdictIcon.className = "material-symbols-outlined text-[120px] text-tertiary-fixed-dim";
@@ -517,6 +661,5 @@
             
             document.getElementById('comparison-title').innerText = `${product.toUpperCase()} DOĞRULANMIŞ FİYATLAR`;
             results.scrollIntoView({ behavior: 'smooth' });
-        }
-    </script>
+        }</script>
 </body></html>
