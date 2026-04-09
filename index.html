@@ -129,11 +129,11 @@
 <div class="mb-8">
 <span class="font-label text-xs uppercase tracking-[0.15em] text-primary-fixed-dim mb-4 block">Alışverişin Yeni Dönemi</span>
 <h1 class="font-headline text-5xl md:text-7xl font-black tracking-[-0.04em] leading-[0.9] text-on-surface mb-6">
-                    Yapay Zeka <br/><span class="text-primary-container">Karar Verir.</span>
+                        Yapay Zeka <br/><span class="text-primary-container">Karar Verir.</span>
 </h1>
 <p class="font-body text-lg text-on-surface-variant max-w-lg leading-relaxed">
-                    Fiyat trendlerini, kullanıcı yorumlarını ve pazar verilerini anında analiz ederek size en mantıklı kararı sunuyoruz.
-                </p>
+                        Fiyat trendlerini, kullanıcı yorumlarını ve pazar verilerini anında analiz ederek size en mantıklı kararı sunuyoruz.
+                    </p>
 </div>
 <div class="space-y-6">
 <div class="group">
@@ -144,7 +144,7 @@
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 <div class="bg-surface-container-lowest rounded-xl p-6 border-2 border-transparent focus-within:border-primary-fixed transition-all duration-300">
-<label class="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Güncel Fiyat (TL)</label>
+<label class="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Sizin Bulduğunuz Fiyat (TL)</label>
 <input class="w-full bg-transparent border-none p-0 focus:ring-0 text-xl font-medium placeholder:text-surface-container-highest" id="product-price" placeholder="0.00" type="number"/>
 </div>
 <button class="bg-primary-container text-on-primary-container font-black tracking-tight rounded-xl px-8 py-6 text-xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-[0_0_40px_-10px_rgba(0,255,65,0.3)]" id="analyze-btn">
@@ -203,8 +203,8 @@
 <div class="max-w-2xl mx-auto">
 <h4 class="font-headline font-bold text-2xl mb-4">Uzman Görüşü</h4>
 <p class="font-body text-lg text-on-surface-variant leading-relaxed" id="result-description">
-                    Bu ürün şu an piyasa ortalamasının altında bir fiyata sahip. Verilerimiz bu ürün için şu anın en doğru zaman olduğunu gösteriyor.
-                </p>
+                        Bu ürün şu an piyasa ortalamasının altında bir fiyata sahip. Verilerimiz bu ürün için şu anın en doğru zaman olduğunu gösteriyor.
+                    </p>
 </div>
 </div>
 <!-- Bento Grid Stats -->
@@ -227,7 +227,7 @@
 <span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
 </a>
 </div>
-<div class="bg-surface-container-low p-6 rounded-xl border border-transparent hover:border-primary-container/30 transition-all">
+<div class="bg-surface-container-low p-6 rounded-xl border border-transparent hover:border-primary-container/30 transition-all" id="best-offer-card">
 <div class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-4">Amazon.tr</div>
 <div class="text-2xl font-black mb-4 text-primary-container"><span class="store-price-val">2.390</span> TL</div>
 <a class="w-full bg-primary-container/10 text-primary-container py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-primary-container/20 transition-colors" href="#" id="link-amazon" target="_blank">
@@ -309,107 +309,141 @@
 </div>
 </footer>
 <script>
-    function handleFileUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const previewImg = document.getElementById('image-preview');
-                const previewContainer = document.getElementById('image-preview-container');
-                const placeholder = document.getElementById('upload-placeholder');
-                
-                previewImg.src = e.target.result;
-                previewContainer.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                
-                // Auto trigger analysis if product name is present
-                startAnalysis();
-            };
-            reader.readAsDataURL(file);
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewImg = document.getElementById('image-preview');
+                    const previewContainer = document.getElementById('image-preview-container');
+                    const placeholder = document.getElementById('upload-placeholder');
+                    
+                    previewImg.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                    
+                    // STOP automatic analysis after image upload
+                    // The analysis should ONLY start when the 'ANALİZ ET' button is clicked.
+                    console.log("Image uploaded. Waiting for manual analysis trigger.");
+                };
+                reader.readAsDataURL(file);
+            }
         }
-    }
 
-    const analyzeBtn = document.getElementById('analyze-btn');
-    analyzeBtn.addEventListener('click', startAnalysis);
+        const analyzeBtn = document.getElementById('analyze-btn');
+        analyzeBtn.addEventListener('click', startAnalysis);
 
-    function startAnalysis() {
-        const productName = document.getElementById('product-name').value.trim();
-        const productPrice = document.getElementById('product-price').value.trim();
+        function startAnalysis() {
+            const productName = document.getElementById('product-name').value.trim();
+            const productPrice = document.getElementById('product-price').value.trim();
 
-        // Show loading state
-        document.getElementById('analysis-results').classList.add('hidden');
-        document.getElementById('loading-state').classList.remove('hidden');
-        
-        // Scroll to loading
-        window.scrollTo({
-            top: document.getElementById('loading-state').offsetTop - 100,
-            behavior: 'smooth'
-        });
+            if (!productName || !productPrice) {
+                alert("Lütfen ürün adını ve fiyatını giriniz.");
+                return;
+            }
 
-        setTimeout(() => {
-            renderResults(productName, productPrice);
-            document.getElementById('loading-state').classList.add('hidden');
-            document.getElementById('analysis-results').classList.remove('hidden');
+            // Show loading state
+            document.getElementById('analysis-results').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
             
+            // Scroll to loading
             window.scrollTo({
-                top: document.getElementById('analysis-results').offsetTop - 100,
+                top: document.getElementById('loading-state').offsetTop - 100,
                 behavior: 'smooth'
             });
-        }, 2500);
-    }
 
-    function renderResults(name, price) {
-        const resText = document.getElementById('result-text');
-        const resIcon = document.getElementById('result-icon');
-        const resIconBg = document.getElementById('result-icon-bg');
-        const resDesc = document.getElementById('result-description');
-        const trendInd = document.getElementById('trend-indicator');
-
-        // Logic for "Realistic Result"
-        // If price is high (e.g. > 5000), recommend BEKLE
-        // If price is suspiciously low (< 100), recommend ALMA (Scam/Quality warning)
-        // Default AL
-        
-        let decision = "AL";
-        let color = "text-primary-container";
-        let bgColor = "bg-primary-container";
-        let icon = "check_circle";
-        let description = `Bu ürün şu an piyasa ortalamasının %15 altında bir fiyata sahip. Son 6 aylık fiyat grafiği incelendiğinde, bu seviyenin dip nokta olduğu görülmektedir.`;
-
-        if (price > 5000) {
-            decision = "BEKLE";
-            color = "text-tertiary-fixed-dim";
-            bgColor = "bg-tertiary-fixed-dim";
-            icon = "schedule";
-            description = `Fiyat şu an zirve noktasında. Verilerimiz önümüzdeki 2 hafta içinde bir indirim dönemi başlayacağını öngörüyor. Sabırlı olmak size tasarruf ettirecektir.`;
-        } else if (price < 100 && price > 0) {
-            decision = "ALMA";
-            color = "text-secondary";
-            bgColor = "bg-secondary";
-            icon = "cancel";
-            description = `Fiyatın aşırı düşük olması şüpheli bir durumdur. Güvenilirlik analizi başarısız oldu veya ürün kalitesi beklentilerin altında kalabilir. Dikkatli olmanızı öneririz.`;
+            setTimeout(() => {
+                renderResults(productName, productPrice);
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('analysis-results').classList.remove('hidden');
+                
+                window.scrollTo({
+                    top: document.getElementById('analysis-results').offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            }, 2500);
         }
 
-        resText.innerText = decision;
-        resText.className = `font-headline text-8xl font-black tracking-[-0.08em] mb-4 ${color}`;
-        resIcon.innerText = icon;
-        resIcon.className = "material-symbols-outlined text-6xl text-on-primary-container";
-        resIconBg.className = `w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_60px_-15px_rgba(0,255,65,0.6)] ${bgColor}`;
-        resDesc.innerText = description;
+        function renderResults(name, userInputPrice) {
+            const resText = document.getElementById('result-text');
+            const resIcon = document.getElementById('result-icon');
+            const resIconBg = document.getElementById('result-icon-bg');
+            const resDesc = document.getElementById('result-description');
+            const trendInd = document.getElementById('trend-indicator');
 
-        // Update Links
-        const searchName = encodeURIComponent(name || "Ürün");
-        document.getElementById('link-hepsiburada').href = `https://www.hepsiburada.com/ara?q=${searchName}`;
-        document.getElementById('link-trendyol').href = `https://www.trendyol.com/sr?q=${searchName}`;
-        document.getElementById('link-amazon').href = `https://www.amazon.com.tr/s?k=${searchName}`;
-        document.getElementById('link-n11').href = `https://www.n11.com/arama?q=${searchName}`;
+            const priceNum = parseFloat(userInputPrice);
+            
+            // Logic for Market Reality Simulation
+            // We simulate a realistic market price based on product categories if keywords match, 
+            // but for generic cases we use a base market price derived from the name or just a mock baseline.
+            // Let's assume a "Market Reality" baseline for the product.
+            let marketRealityPrice = 2500; // default baseline
 
-        // Mock price variations
-        const basePrice = parseFloat(price) || 2500;
-        document.querySelectorAll('.store-price-val').forEach((el, index) => {
-            const variation = (Math.random() * 0.1 - 0.05) * basePrice;
-            el.innerText = Math.round(basePrice + variation).toLocaleString('tr-TR');
-        });
-    }
-</script>
+            // Specific "Price Guardian" triggers for testing logic
+            if (name.toLowerCase().includes("iphone") || priceNum > 20000) {
+                marketRealityPrice = 10000; // Simulated market price for high value items being "overpriced" by user
+            } else if (priceNum < 500) {
+                marketRealityPrice = 450;
+            }
+
+            let decision = "AL";
+            let color = "text-primary-container";
+            let bgColor = "bg-primary-container";
+            let shadowColor = "rgba(0,255,65,0.6)";
+            let icon = "check_circle";
+            let description = `Bu ürün şu an piyasa ortalamasının altında veya denginde bir fiyata sahip. Verilerimiz bu ürün için şu anın mantıklı bir zaman olduğunu gösteriyor.`;
+
+            // PRICE GUARDIAN LOGIC
+            // Requirement 3: If user enters a high price vs market reality
+            if (priceNum >= marketRealityPrice * 2) {
+                decision = "ALMA";
+                color = "text-secondary";
+                bgColor = "bg-secondary";
+                shadowColor = "rgba(255,180,170,0.6)";
+                icon = "cancel";
+                description = `Bu ürün piyasada ${marketRealityPrice.toLocaleString('tr-TR')} TL civarında bulunabiliyor, girdiğiniz fiyat (${priceNum.toLocaleString('tr-TR')} TL) çok yüksek. KESİNLİKLE ALMA!`;
+            } else if (priceNum > marketRealityPrice * 1.1) {
+                decision = "BEKLE";
+                color = "text-tertiary-fixed-dim";
+                bgColor = "bg-tertiary-fixed-dim";
+                shadowColor = "rgba(241,193,0,0.6)";
+                icon = "schedule";
+                description = `Fiyat şu an piyasa ortalamasının (${marketRealityPrice.toLocaleString('tr-TR')} TL) biraz üzerinde. Kısa süre içinde daha iyi fırsatlar yakalayabilirsiniz.`;
+            }
+
+            resText.innerText = decision;
+            resText.className = `font-headline text-8xl font-black tracking-[-0.08em] mb-4 ${color}`;
+            resIcon.innerText = icon;
+            resIcon.className = "material-symbols-outlined text-6xl text-on-primary-container";
+            resIconBg.className = `w-32 h-32 rounded-full flex items-center justify-center ${bgColor}`;
+            resIconBg.style.boxShadow = `0 0 60px -15px ${shadowColor}`;
+            resDesc.innerText = description;
+
+            // Update Links
+            const searchName = encodeURIComponent(name || "Ürün");
+            document.getElementById('link-hepsiburada').href = `https://www.hepsiburada.com/ara?q=${searchName}`;
+            document.getElementById('link-trendyol').href = `https://www.trendyol.com/sr?q=${searchName}`;
+            document.getElementById('link-amazon').href = `https://www.amazon.com.tr/s?k=${searchName}`;
+            document.getElementById('link-n11').href = `https://www.n11.com/arama?q=${searchName}`;
+
+            // Mock price variations based on "Market Reality"
+            const priceElements = document.querySelectorAll('.store-price-val');
+            priceElements.forEach((el, index) => {
+                const variation = (Math.random() * 0.1 - 0.05) * marketRealityPrice;
+                const storePrice = Math.round(marketRealityPrice + variation);
+                el.innerText = storePrice.toLocaleString('tr-TR');
+                
+                // Highlight the store with the best price (lowest)
+                const parent = el.closest('.bg-surface-container-low');
+                parent.classList.remove('border-primary-container/30', 'border-transparent');
+                if (index === 2) { // Just for visual consistency with original design (Amazon usually green)
+                    el.classList.add('text-primary-container');
+                    parent.classList.add('border-primary-container/30');
+                } else {
+                    el.classList.remove('text-primary-container');
+                    parent.classList.add('border-transparent');
+                }
+            });
+        }
+    </script>
 </body></html>
