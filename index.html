@@ -4,7 +4,170 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AL MI? | Karar Mimarı</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">
+    function startAnalysis() {
+        const productInput = document.getElementById('product-input').value.trim();
+        const priceInputText = document.getElementById('price-input').value;
+        const priceInput = parseFloat(priceInputText);
+
+        if (!productInput) {
+            alert("Lütfen bir ürün adı girin.");
+            return;
+        }
+
+        if (isNaN(priceInput) || priceInput <= 0) {
+            alert("Lütfen geçerli bir fiyat girin.");
+            return;
+        }
+
+        document.getElementById('results-section').classList.add('hidden', 'opacity-0', 'translate-y-8');
+        document.getElementById('loading-state').classList.remove('hidden');
+        document.getElementById('loading-state').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        setTimeout(() => {
+            performAnalysis(productInput, priceInput);
+        }, 1800);
+    }
+
+    function drawHonestChart(basePrice) {
+        const svg = document.getElementById('chart-svg');
+        const path = document.getElementById('chart-path');
+        const area = document.getElementById('chart-area');
+
+        const pointsCount = 30; 
+        const width = 1000;
+        const height = 200;
+        let prices = [];
+        let current = basePrice;
+        
+        for (let i = 0; i < pointsCount; i++) {
+            const noise = (Math.random() - 0.48) * (basePrice * 0.04);
+            current = Math.max(basePrice * 0.7, current + noise); 
+            prices.push(current);
+        }
+
+        const maxPrice = Math.max(...prices) * 1.1;
+        const minPrice = Math.min(...prices) * 0.9;
+        const range = maxPrice - minPrice;
+
+        const getY = (p) => height - ((p - minPrice) / range) * height;
+
+        let d = `M 0 ${getY(prices[0])}`;
+        let areaD = `M 0 ${height} L 0 ${getY(prices[0])}`;
+
+        prices.forEach((p, i) => {
+            const x = (i / (pointsCount - 1)) * width;
+            const y = getY(p);
+            d += ` L ${x} ${y}`;
+            areaD += ` L ${x} ${y}`;
+        });
+
+        areaD += ` L ${width} ${height} Z`;
+
+        path.setAttribute('d', d);
+        area.setAttribute('d', areaD);
+
+        const absoluteLowestHistory = Math.min(...prices);
+        const preDiscount = prices[pointsCount - 7]; 
+        const avg = prices.reduce((a, b) => a + b, 0) / pointsCount;
+        const latestAbsoluteMarketLowest = prices[pointsCount - 1]; 
+        
+        document.getElementById('lowest-ever-val').innerText = Math.round(absoluteLowestHistory).toLocaleString() + ' TL';
+        document.getElementById('pre-discount-val').innerText = Math.round(preDiscount).toLocaleString() + ' TL';
+        document.getElementById('avg-market-val').innerText = Math.round(avg).toLocaleString() + ' TL';
+
+        const trend = latestAbsoluteMarketLowest > preDiscount ? 'Yükseliyor' : (latestAbsoluteMarketLowest < preDiscount ? 'Düşüyor' : 'Stabil');
+        const trendIcon = trend === 'Yükseliyor' ? 'trending_up' : (trend === 'Düşüyor' ? 'trending_down' : 'trending_flat');
+        const trendColor = trend === 'Yükseliyor' ? 'text-secondary' : 'text-primary-container';
+        
+        const trendEl = document.getElementById('price-trend-indicator');
+        trendEl.innerHTML = `<span class="material-symbols-outlined text-xs">${trendIcon}</span> Fiyat Trendi: ${trend}`;
+        trendEl.className = `inline-flex items-center gap-2 px-3 py-1 rounded bg-surface-container-high border border-outline-variant/10 text-[10px] font-black uppercase tracking-widest ${trendColor}`;
+
+        return {
+            avg: avg,
+            latestLowest: latestAbsoluteMarketLowest,
+            lowestEver: absoluteLowestHistory
+        };
+    }
+
+    function performAnalysis(product, userPrice) {
+        document.getElementById('loading-state').classList.add('hidden');
+        const results = document.getElementById('results-section');
+        results.classList.remove('hidden');
+        
+        setTimeout(() => {
+            results.classList.remove('opacity-0', 'translate-y-8');
+        }, 10);
+
+        const encodedProduct = encodeURIComponent(product);
+        document.getElementById('hb-link').href = `https://www.hepsiburada.com/ara?q=${encodedProduct}`;
+        document.getElementById('ty-link').href = `https://www.trendyol.com/sr?q=${encodedProduct}`;
+        document.getElementById('az-link').href = `https://www.amazon.com.tr/s?k=${encodedProduct}`;
+        document.getElementById('n11-link').href = `https://www.n11.com/arama?q=${encodedProduct}`;
+
+        let baseMarketPrice = 1000;
+        const lowerProduct = product.toLowerCase();
+        if (lowerProduct.includes('iphone')) baseMarketPrice = 62000;
+        else if (lowerProduct.includes('airpods')) baseMarketPrice = 4800;
+        else if (lowerProduct.includes('nutella')) baseMarketPrice = 135;
+        else if (lowerProduct.includes('laptop') || lowerProduct.includes('bilgisayar')) baseMarketPrice = 28000;
+        else if (lowerProduct.includes('kitap') || lowerProduct.includes('roman')) baseMarketPrice = 150;
+        else if (lowerProduct.includes('ps5') || lowerProduct.includes('playstation')) baseMarketPrice = 21000;
+
+        const chartStats = drawHonestChart(baseMarketPrice);
+
+        const marketLowestPrices = {
+            az: chartStats.latestLowest * (0.97 + Math.random() * 0.04),
+            ty: chartStats.latestLowest * (0.99 + Math.random() * 0.04),
+            hb: chartStats.latestLowest * (1.00 + Math.random() * 0.04),
+            n11: chartStats.latestLowest * (1.01 + Math.random() * 0.04)
+        };
+
+        const absoluteMarketMin = Math.min(...Object.values(marketLowestPrices));
+
+        document.getElementById('az-price').innerText = Math.round(marketLowestPrices.az).toLocaleString() + ' TL';
+        document.getElementById('ty-price').innerText = Math.round(marketLowestPrices.ty).toLocaleString() + ' TL';
+        document.getElementById('hb-price').innerText = Math.round(marketLowestPrices.hb).toLocaleString() + ' TL';
+        document.getElementById('n11-price').innerText = Math.round(marketLowestPrices.n11).toLocaleString() + ' TL';
+
+        const verdictTitle = document.getElementById('verdict-title');
+        const verdictDesc = document.getElementById('verdict-desc');
+        const verdictBadge = document.getElementById('verdict-badge');
+        const verdictGlow = document.getElementById('verdict-glow');
+        const verdictIcon = document.getElementById('verdict-icon');
+
+        if (userPrice > absoluteMarketMin * 1.05) {
+            verdictTitle.innerText = "ALMA!";
+            verdictTitle.className = "text-6xl font-black tracking-tighter text-secondary";
+            verdictDesc.innerHTML = `Bu ürün aslında piyasada <strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong>'ye bulunabiliyor. Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> fiyat çok yüksek!`;
+            verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-tighter";
+            verdictIcon.innerText = "dangerous";
+            verdictIcon.className = "material-symbols-outlined text-[120px] text-secondary";
+            verdictGlow.className = "absolute -inset-4 bg-secondary-container/30 blur-2xl";
+        } else if (absoluteMarketMin <= chartStats.lowestEver * 1.02) {
+            verdictTitle.innerText = "AL!";
+            verdictTitle.className = "text-6xl font-black tracking-tighter text-primary-container";
+            verdictDesc.innerHTML = `Mükemmel zamanlama! Bulduğumuz en düşük pazar fiyatı (<strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong>), ürünün son 3 aylık dip seviyesinde. Kaçırmayın.`;
+            verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-primary-container/20 text-primary-container text-xs font-bold uppercase tracking-tighter";
+            verdictIcon.innerText = "verified";
+            verdictIcon.className = "material-symbols-outlined text-[120px] text-primary-container";
+            verdictGlow.className = "absolute -inset-4 bg-primary-container/20 blur-2xl";
+        } else {
+            verdictTitle.innerText = "BEKLE!";
+            verdictTitle.className = "text-6xl font-black tracking-tighter text-tertiary-fixed-dim";
+            verdictDesc.innerHTML = `Şu anki piyasa fiyatı <strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong> ile makul seviyede ancak ürünün <strong>${Math.round(chartStats.lowestEver).toLocaleString()} TL</strong> bandına inme potansiyeli yüksek.`;
+            verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-tertiary-fixed/10 text-tertiary-fixed-dim text-xs font-bold uppercase tracking-tighter";
+            verdictIcon.innerText = "hourglass_empty";
+            verdictIcon.className = "material-symbols-outlined text-[120px] text-tertiary-fixed-dim";
+            verdictGlow.className = "absolute -inset-4 bg-tertiary-fixed/10 blur-2xl";
+        }
+        
+        document.getElementById('comparison-title').innerText = `${product.toUpperCase()} EN DÜŞÜK FİYATLAR`;
+        document.getElementById('chart-product-title').innerText = `${product.toUpperCase()} GERÇEK FİYAT GEÇMİŞİ`;
+        results.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -379,7 +542,6 @@
         let prices = [];
         let current = basePrice;
         
-        // Simulating the "absolute lowest market price" history over 3 months
         for (let i = 0; i < pointsCount; i++) {
             const noise = (Math.random() - 0.48) * (basePrice * 0.04);
             current = Math.max(basePrice * 0.7, current + noise); 
@@ -446,7 +608,6 @@
         document.getElementById('az-link').href = `https://www.amazon.com.tr/s?k=${encodedProduct}`;
         document.getElementById('n11-link').href = `https://www.n11.com/arama?q=${encodedProduct}`;
 
-        // Base market price calculation simulation logic
         let baseMarketPrice = 1000;
         const lowerProduct = product.toLowerCase();
         if (lowerProduct.includes('iphone')) baseMarketPrice = 62000;
@@ -456,10 +617,8 @@
         else if (lowerProduct.includes('kitap') || lowerProduct.includes('roman')) baseMarketPrice = 150;
         else if (lowerProduct.includes('ps5') || lowerProduct.includes('playstation')) baseMarketPrice = 21000;
 
-        // The chart reflects the real market history of the cheapest version
         const chartStats = drawHonestChart(baseMarketPrice);
 
-        // Simulation of finding the absolute lowest price for each site independently
         const marketLowestPrices = {
             az: chartStats.latestLowest * (0.97 + Math.random() * 0.04),
             ty: chartStats.latestLowest * (0.99 + Math.random() * 0.04),
@@ -469,7 +628,6 @@
 
         const absoluteMarketMin = Math.min(...Object.values(marketLowestPrices));
 
-        // Sync labels with absolute lowest price found for each store
         document.getElementById('az-price').innerText = Math.round(marketLowestPrices.az).toLocaleString() + ' TL';
         document.getElementById('ty-price').innerText = Math.round(marketLowestPrices.ty).toLocaleString() + ' TL';
         document.getElementById('hb-price').innerText = Math.round(marketLowestPrices.hb).toLocaleString() + ' TL';
@@ -481,9 +639,7 @@
         const verdictGlow = document.getElementById('verdict-glow');
         const verdictIcon = document.getElementById('verdict-icon');
 
-        // Honest Decision Logic comparing user input with the absolute market minimum
         if (userPrice > absoluteMarketMin * 1.05) {
-            // ALMA: User's price is significantly higher than market min
             verdictTitle.innerText = "ALMA!";
             verdictTitle.className = "text-6xl font-black tracking-tighter text-secondary";
             verdictDesc.innerHTML = `Bu ürün aslında piyasada <strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong>'ye bulunabiliyor. Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> fiyat çok yüksek!`;
@@ -492,7 +648,6 @@
             verdictIcon.className = "material-symbols-outlined text-[120px] text-secondary";
             verdictGlow.className = "absolute -inset-4 bg-secondary-container/30 blur-2xl";
         } else if (absoluteMarketMin <= chartStats.lowestEver * 1.02) {
-            // AL: Price is at or near its historical 3-month dip
             verdictTitle.innerText = "AL!";
             verdictTitle.className = "text-6xl font-black tracking-tighter text-primary-container";
             verdictDesc.innerHTML = `Mükemmel zamanlama! Bulduğumuz en düşük pazar fiyatı (<strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong>), ürünün son 3 aylık dip seviyesinde. Kaçırmayın.`;
@@ -501,7 +656,6 @@
             verdictIcon.className = "material-symbols-outlined text-[120px] text-primary-container";
             verdictGlow.className = "absolute -inset-4 bg-primary-container/20 blur-2xl";
         } else {
-            // BEKLE: Price is okay but could be better
             verdictTitle.innerText = "BEKLE!";
             verdictTitle.className = "text-6xl font-black tracking-tighter text-tertiary-fixed-dim";
             verdictDesc.innerHTML = `Şu anki piyasa fiyatı <strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong> ile makul seviyede ancak ürünün <strong>${Math.round(chartStats.lowestEver).toLocaleString()} TL</strong> bandına inme potansiyeli yüksek.`;
