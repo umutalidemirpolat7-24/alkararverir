@@ -7,7 +7,6 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -85,9 +84,29 @@
             background-color: #131313;
             color: #e5e2e1;
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
         .mesh-gradient {
             background: radial-gradient(circle at 50% 50%, rgba(0, 255, 65, 0.08) 0%, transparent 70%);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loading-spinner {
+            border: 3px solid rgba(0, 255, 65, 0.1);
+            border-top: 3px solid #00FF41;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -96,11 +115,11 @@
 <header class="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-xl">
 <div class="flex justify-between items-center px-6 h-16 w-full max-w-7xl mx-auto">
 <div class="text-2xl font-black text-[#00FF41] tracking-[-0.04em] font-['Inter']">
-                AL MI?
-            </div>
+            AL MI?
+        </div>
 <div class="flex items-center gap-6">
-<span class="material-symbols-outlined text-[#00FF41] cursor-pointer hover:text-[#EBFFE2] transition-colors Active: scale-95 transition-transform" data-icon="history">history</span>
-<span class="material-symbols-outlined text-neutral-400 cursor-pointer hover:text-[#EBFFE2] transition-colors Active: scale-95 transition-transform" data-icon="account_circle">account_circle</span>
+<span class="material-symbols-outlined text-[#00FF41] cursor-pointer hover:text-[#EBFFE2] transition-colors active:scale-95 transition-transform" data-icon="history">history</span>
+<span class="material-symbols-outlined text-neutral-400 cursor-pointer hover:text-[#EBFFE2] transition-colors active:scale-95 transition-transform" data-icon="account_circle">account_circle</span>
 </div>
 </div>
 </header>
@@ -110,32 +129,34 @@
 <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 <!-- Input Canvas (Left) -->
 <div class="lg:col-span-7 space-y-8">
-<div class="relative group overflow-hidden bg-surface-container-low rounded-xl p-1">
-<div class="flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/30 rounded-lg aspect-[16/10] bg-surface-container-lowest transition-all hover:bg-surface-container-low">
-<div class="flex flex-col items-center gap-4 text-on-surface-variant group-hover:text-primary-fixed">
+<div class="relative group overflow-hidden bg-surface-container-low rounded-xl p-1" id="drop-zone">
+<div class="flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/30 rounded-lg aspect-[16/10] bg-surface-container-lowest transition-all hover:bg-surface-container-low overflow-hidden relative" id="upload-container">
+<div class="flex flex-col items-center gap-4 text-on-surface-variant group-hover:text-primary-fixed" id="upload-prompt">
 <span class="material-symbols-outlined text-5xl" data-icon="add_a_photo">add_a_photo</span>
 <div class="text-center">
 <p class="font-bold text-lg tracking-tight">Upload Product Image</p>
 <p class="text-sm opacity-60">Drag &amp; drop or click to scan item</p>
 </div>
 </div>
-<input class="absolute inset-0 opacity-0 cursor-pointer" type="file"/>
+<img alt="Product preview" class="hidden absolute inset-0 w-full h-full object-contain p-4" id="image-preview"/>
+<input accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" id="file-input" type="file"/>
 </div>
 </div>
 <div class="space-y-4">
 <label class="label-sm uppercase tracking-[0.05em] font-bold text-on-surface-variant text-xs">Current Market Details</label>
 <div class="relative group">
-<input class="w-full h-20 px-8 bg-surface-container-lowest rounded-xl border-none text-2xl font-black focus:ring-2 focus:ring-primary-fixed-dim/30 placeholder:text-neutral-700 transition-all" placeholder="Enter Product Price (TL)" type="number"/>
+<input class="w-full h-20 px-8 bg-surface-container-lowest rounded-xl border-none text-2xl font-black focus:ring-2 focus:ring-primary-fixed-dim/30 placeholder:text-neutral-700 transition-all text-on-surface" id="price-input" placeholder="Enter Product Price (TL)" type="number"/>
 <div class="absolute right-8 top-1/2 -translate-y-1/2 text-neutral-500 font-bold">TL</div>
 </div>
-<button class="w-full bg-primary-container text-on-primary-container font-black py-6 rounded-full text-xl shadow-[0_0_40px_rgba(0,230,57,0.15)] hover:scale-[1.02] active:scale-95 transition-all">
-                            ANALYZE WITH AI
-                        </button>
+<button class="w-full bg-primary-container text-on-primary-container font-black py-6 rounded-full text-xl shadow-[0_0_40px_rgba(0,230,57,0.15)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed" id="analyze-btn">
+<span id="btn-text">ANALYZE WITH AI</span>
+<div class="loading-spinner hidden" id="btn-loader"></div>
+</button>
 </div>
 </div>
 <!-- Live Results Context (Right) -->
 <div class="lg:col-span-5 space-y-6">
-<div class="bg-surface-container-high p-8 rounded-xl relative overflow-hidden">
+<div class="bg-surface-container-high p-8 rounded-xl relative overflow-hidden h-full">
 <div class="flex items-center gap-2 mb-8">
 <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
 <span class="text-[10px] font-black uppercase tracking-widest text-primary-fixed">Real-Time Tracker</span>
@@ -144,92 +165,87 @@
 <div>
 <h3 class="text-sm text-on-surface-variant font-bold uppercase tracking-wider mb-2">AI IDENTIFIED PRODUCT</h3>
 <div class="bg-surface-container-lowest p-4 rounded-lg flex items-center gap-4">
-<div class="w-12 h-12 bg-neutral-800 rounded flex items-center justify-center">
-<span class="material-symbols-outlined text-neutral-500" data-icon="image_search">image_search</span>
+<div class="w-12 h-12 bg-neutral-800 rounded flex items-center justify-center overflow-hidden" id="scan-indicator">
+<span class="material-symbols-outlined text-neutral-500" data-icon="image_search" id="scan-icon">image_search</span>
+<img alt="Thumbnail" class="hidden w-full h-full object-cover" id="small-preview" src=""/>
 </div>
-<p class="text-lg font-bold text-on-surface truncate">Waiting for Scan...</p>
+<p class="text-lg font-bold text-on-surface truncate" id="product-name">Waiting for Scan...</p>
 </div>
 </div>
 <div class="grid grid-cols-2 gap-4">
 <div class="bg-surface-container p-4 rounded-lg">
 <p class="text-[10px] text-on-surface-variant font-black uppercase mb-1">Market Average</p>
-<p class="text-xl font-black text-on-surface">--</p>
+<p class="text-xl font-black text-on-surface" id="avg-price-val">--</p>
 </div>
 <div class="bg-surface-container p-4 rounded-lg">
 <p class="text-[10px] text-on-surface-variant font-black uppercase mb-1">30D Lowest</p>
-<p class="text-xl font-black text-primary-fixed">--</p>
+<p class="text-xl font-black text-primary-fixed" id="lowest-price-val">--</p>
 </div>
 </div>
 </div>
-<!-- Verdict Card Overlay (Hidden until analyze) -->
-<div class="mt-8 pt-8 border-t border-outline-variant/10">
-<div class="text-center">
+<!-- Verdict Card Overlay -->
+<div class="mt-8 pt-8 border-t border-outline-variant/10" id="verdict-container">
+<div class="text-center" id="verdict-placeholder">
 <span class="text-neutral-500 text-sm italic">Analysis will appear here after scanning.</span>
+</div>
+<div class="hidden flex flex-col items-center" id="verdict-result">
+<p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-2">Final Verdict</p>
+<div class="px-10 py-4 rounded-xl text-5xl font-black mb-4" id="verdict-badge">--</div>
+<p class="text-sm text-center text-on-surface-variant max-w-[200px]" id="verdict-desc"></p>
 </div>
 </div>
 </div>
 </div>
 </section>
 <!-- Comparison Grid (Bento Style) -->
-<section class="mt-16 space-y-8">
+<section class="mt-16 space-y-8" id="landscape-section">
 <div class="flex justify-between items-end">
 <div>
 <h2 class="text-4xl font-black tracking-tighter">Market Landscape</h2>
 <p class="text-on-surface-variant">Live pricing from verified Turkish retailers.</p>
 </div>
 <div class="flex gap-2">
-<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center">
+<button class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-surface-container-highest transition-colors" id="refresh-landscape">
 <span class="material-symbols-outlined text-xs" data-icon="refresh">refresh</span>
+</button>
 </div>
 </div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-<!-- Retailer 1: Hepsiburada -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 opacity-50 transition-opacity" id="retailer-grid">
+<!-- Retailers populated dynamically -->
 <div class="bg-surface-container-low p-6 rounded-lg group hover:bg-surface-container-high transition-colors">
-<div class="flex justify-between items-start mb-12">
-<div class="h-8 w-24 bg-neutral-800 rounded animate-pulse"></div>
+<div class="flex justify-between items-start mb-12 h-8">
+<img alt="Hepsiburada" class="h-6 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWzWxQ86yLZaQnySntugswQPzL3GLhXQyTd8tOvBDJ9k2mSw5oUmSIlU6UKQvwv7cB1Za26fn352mFz1HPyd8ZqGZfRV9nwsLFbPykvbOFKtjxApxLH2wtQi3cXRqaMjnH_6x1OxA-DjjgbGCiszU1skqViKtvBbr1i7zOTy6mAD3pNcK1bc3aVRjse89RQGBiSwBqknRlQ62j7Z43C6OQllaZfOWrIjhtnEzxmznoAEMoHo4rS8eB7qn5M_cdX4BM6E8CmUtzqkQY"/>
 <span class="text-[10px] font-black bg-primary-container/10 text-primary-container px-2 py-1 rounded">FASTEST</span>
 </div>
-<p class="text-2xl font-black mb-4">-- TL</p>
-<a class="w-full block text-center py-3 bg-surface-container-highest rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-all" href="https://www.hepsiburada.com/ara?q=product" target="_blank">
-                            GO TO PRODUCT
-                        </a>
+<p class="text-2xl font-black mb-4 retailer-price">-- TL</p>
+<a class="retailer-link w-full block text-center py-3 bg-surface-container-highest rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" target="_blank">GO TO PRODUCT</a>
 </div>
-<!-- Retailer 2: Trendyol -->
 <div class="bg-surface-container-low p-6 rounded-lg group hover:bg-surface-container-high transition-colors">
-<div class="flex justify-between items-start mb-12">
-<div class="h-8 w-24 bg-neutral-800 rounded animate-pulse"></div>
+<div class="flex justify-between items-start mb-12 h-8">
+<img alt="Trendyol" class="h-6 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzMzhs5SQZCpAgw192mCS_-2KVR3FmCLXGokZMywKf4ZxAC1CkiNy0uElnuwwFuOk79jpPvQagKbH_Dig58W36wsIuAbZzObRx4HLHVbH2ncm6aVI9yAr9HS3nrQca_9YE0eP2kCMTWE3P47_2FWuHV1Tc6hQPYr6Xv00yLe4RusRDcPPIEf6IYmvsHQ1YDvn7iBckfuVcjstpKlqY7EclYPUt5VU3RruKwE5sLft19jiR-V2EEAeJn5ZaXNglbYx-X4PMnCFRnNXh"/>
 </div>
-<p class="text-2xl font-black mb-4">-- TL</p>
-<a class="w-full block text-center py-3 bg-surface-container-highest rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-all" href="https://www.trendyol.com/sr?q=product" target="_blank">
-                            GO TO PRODUCT
-                        </a>
+<p class="text-2xl font-black mb-4 retailer-price">-- TL</p>
+<a class="retailer-link w-full block text-center py-3 bg-surface-container-highest rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" target="_blank">GO TO PRODUCT</a>
 </div>
-<!-- Retailer 3: Amazon -->
 <div class="bg-surface-container-low p-6 rounded-lg group hover:bg-surface-container-high transition-colors">
-<div class="flex justify-between items-start mb-12">
-<div class="h-8 w-24 bg-neutral-800 rounded animate-pulse"></div>
+<div class="flex justify-between items-start mb-12 h-8">
+<img alt="Amazon" class="h-5 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all mt-1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDx5CUVDLU5tc0Mz4VEx6qtwxXLzfAD_0nLYpZeANYQPHotDbeZcEnZGEW4huR5S1vGja5k8_UgigbR7cSvtnzeDrGUyPZg9KYkE_9UsVrCJPuYJ93DkwxpWym0oxBjX8vsUL6R5SG01S8FpdpcqHRDNN8-WDK1n8l8FtoMa2hCE9BNYBG3InR6Dk3vSd3PXk7nqxxpIBbfWJj5ZhRyVYB-poMErUTHks4t7dMYqL416k3VLaPgiz2QvJIk4fv293nwcZQ9oGLKF2sI"/>
 <span class="text-[10px] font-black bg-secondary-container/10 text-secondary-fixed px-2 py-1 rounded">BEST SERVICE</span>
 </div>
-<p class="text-2xl font-black mb-4">-- TL</p>
-<a class="w-full block text-center py-3 bg-surface-container-highest rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-all" href="https://www.amazon.com.tr/s?k=product" target="_blank">
-                            GO TO PRODUCT
-                        </a>
+<p class="text-2xl font-black mb-4 retailer-price">-- TL</p>
+<a class="retailer-link w-full block text-center py-3 bg-surface-container-highest rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" target="_blank">GO TO PRODUCT</a>
 </div>
-<!-- Retailer 4: N11 -->
 <div class="bg-surface-container-low p-6 rounded-lg group hover:bg-surface-container-high transition-colors">
-<div class="flex justify-between items-start mb-12">
-<div class="h-8 w-24 bg-neutral-800 rounded animate-pulse"></div>
+<div class="flex justify-between items-start mb-12 h-8">
+<img alt="N11" class="h-6 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc-RDeRzXtHhDIIgqP6JxHm3flqVkGtrRYxa96im6OI72S9FVmSGJZbD7ZupWbXGPtTgi0oydafocfTMPqLPZGvaZSfrWWmPlWhJfA2wZ809N33f_mBekeI66Z3W8cXdzgE1BP-4YuPsIECN4hV-ClbYgjnA4TxeesiIutpj3cVx-hhHys_pj-tJG-LbF1k0WtEG-TsE7Wlo7MeYuzazac7pv2XNfZ09kdtMIhTNLawJ6fiRD9zxJuPQfZ7AoaIcIG82Dk5qAlxRe0"/>
 </div>
-<p class="text-2xl font-black mb-4">-- TL</p>
-<a class="w-full block text-center py-3 bg-surface-container-highest rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-all" href="https://www.n11.com/arama?q=product" target="_blank">
-                            GO TO PRODUCT
-                        </a>
+<p class="text-2xl font-black mb-4 retailer-price">-- TL</p>
+<a class="retailer-link w-full block text-center py-3 bg-surface-container-highest rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-container hover:text-on-primary-container transition-all" href="#" target="_blank">GO TO PRODUCT</a>
 </div>
 </div>
 </section>
 <!-- AI Opinion Section -->
-<section class="mt-16 bg-surface-container-lowest rounded-xl overflow-hidden">
+<section class="mt-16 bg-surface-container-lowest rounded-xl overflow-hidden opacity-50 transition-all" id="ai-opinion-section">
 <div class="grid grid-cols-1 md:grid-cols-12">
 <div class="md:col-span-4 p-8 bg-surface-container-high flex flex-col justify-between">
 <div>
@@ -242,18 +258,18 @@
 </div>
 <div>
 <p class="font-bold text-sm">System Architect v.4.0</p>
-<p class="text-[10px] text-primary-fixed uppercase tracking-tighter">Ready for Query</p>
+<p class="text-[10px] text-primary-fixed uppercase tracking-tighter" id="system-status">Ready for Query</p>
 </div>
 </div>
 </div>
-<div class="md:col-span-8 p-8 relative">
+<div class="md:col-span-8 p-8 relative min-h-[200px] flex items-center">
 <div class="absolute right-8 top-8 opacity-10">
 <span class="material-symbols-outlined text-8xl" data-icon="format_quote">format_quote</span>
 </div>
 <div class="space-y-4 max-w-lg">
-<p class="text-on-surface leading-relaxed italic">
-                                "The Decision Architect is currently idle. Once you provide a product scan or name, I will cross-reference the current price against the Turkish Consumer Price Index and 30-day historical troughs from major retailers. My logic prioritizes long-term value over short-term dopamine triggers."
-                            </p>
+<p class="text-on-surface leading-relaxed italic" id="ai-quote">
+                            "The Decision Architect is currently idle. Once you provide a product scan or name, I will cross-reference the current price against the Turkish Consumer Price Index and 30-day historical troughs from major retailers. My logic prioritizes long-term value over short-term dopamine triggers."
+                        </p>
 <div class="flex gap-4">
 <div class="flex items-center gap-1">
 <span class="material-symbols-outlined text-primary-fixed text-sm" data-icon="verified">verified</span>
@@ -261,7 +277,7 @@
 </div>
 <div class="flex items-center gap-1">
 <span class="material-symbols-outlined text-primary-fixed text-sm" data-icon="timer">timer</span>
-<span class="text-[10px] font-bold text-on-surface-variant">Last Update: 2m ago</span>
+<span class="text-[10px] font-bold text-on-surface-variant" id="last-update">Last Update: Just now</span>
 </div>
 </div>
 </div>
@@ -285,13 +301,165 @@
 <span class="font-['Inter'] uppercase text-[10px] tracking-[0.05em] font-bold">Savings</span>
 </a>
 </nav>
-<!-- Map Context Decorator (Subtle) -->
+<!-- Map Context Decorator -->
 <div class="fixed bottom-24 right-8 hidden xl:block opacity-40 hover:opacity-100 transition-opacity">
 <div class="w-32 h-32 rounded-xl bg-surface-container-high p-1">
-<div class="w-full h-full rounded-lg bg-neutral-800 flex items-center justify-center text-[10px] font-black text-center px-2">
+<div class="w-full h-full rounded-lg bg-neutral-800 flex items-center justify-center text-[10px] font-black text-center px-2 overflow-hidden">
 <img class="w-full h-full object-cover rounded shadow-inner" data-alt="abstract satellite view of Istanbul city lights at night with glowing veins of traffic" data-location="Istanbul" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-66Z7WaLAPGy21yJ7YCtB5XdPha0EaIyclzoDqqBbH7nUOxZXXWMBSyHG8d8A-exPPA5PSwt-akExRssAqFJ49fGN0kXskgmjIZvEi2ua6QHDdqrZjEsFJmjQIYsPwTlyqTJSBvkL_XIOfbJNgcoAXkpZmC3_epHFgzHOMf7dPtkOJFkGWPJMTSPaZrk-jT0rNWajrpsYhF6EyDXbvw4EzU1QrqNO2Twjkp3T7rtR4t-_AuuTPte0oR8TSIZkmKbq6ftst256TL_b"/>
 </div>
 </div>
 <p class="text-[8px] font-black text-center mt-2 uppercase tracking-[0.2em] text-on-surface-variant">Local Market Nodes</p>
 </div>
+<script>
+    const fileInput = document.getElementById('file-input');
+    const imagePreview = document.getElementById('image-preview');
+    const smallPreview = document.getElementById('small-preview');
+    const scanIcon = document.getElementById('scan-icon');
+    const uploadPrompt = document.getElementById('upload-prompt');
+    const priceInput = document.getElementById('price-input');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnLoader = document.getElementById('btn-loader');
+    const productName = document.getElementById('product-name');
+    const verdictContainer = document.getElementById('verdict-container');
+    const verdictPlaceholder = document.getElementById('verdict-placeholder');
+    const verdictResult = document.getElementById('verdict-result');
+    const verdictBadge = document.getElementById('verdict-badge');
+    const verdictDesc = document.getElementById('verdict-desc');
+    const avgPriceVal = document.getElementById('avg-price-val');
+    const lowestPriceVal = document.getElementById('lowest-price-val');
+    const retailerGrid = document.getElementById('retailer-grid');
+    const aiOpinionSection = document.getElementById('ai-opinion-section');
+    const aiQuote = document.getElementById('ai-quote');
+    const systemStatus = document.getElementById('system-status');
+
+    let currentFileName = "";
+
+    // File Upload Logic
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            currentFileName = file.name.split('.')[0].replace(/[-_]/g, ' ');
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imagePreview.src = event.target.result;
+                smallPreview.src = event.target.result;
+                
+                imagePreview.classList.remove('hidden');
+                smallPreview.classList.remove('hidden');
+                scanIcon.classList.add('hidden');
+                uploadPrompt.classList.add('hidden');
+                
+                productName.textContent = currentFileName.toUpperCase() + " Detected";
+                productName.classList.add('fade-in');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Analysis Logic
+    analyzeBtn.addEventListener('click', function() {
+        const price = parseFloat(priceInput.value);
+        if (!price || !currentFileName) {
+            alert("Please upload an image and enter a price first.");
+            return;
+        }
+
+        // Loading State
+        analyzeBtn.disabled = true;
+        btnText.textContent = "THINKING...";
+        btnLoader.classList.remove('hidden');
+        systemStatus.textContent = "ANALYZING DATA...";
+        systemStatus.classList.add('animate-pulse');
+
+        setTimeout(() => {
+            // Simulated Data
+            const basePrice = price * (0.85 + Math.random() * 0.3); // Simulate market avg around input price
+            const marketAvg = Math.round(basePrice);
+            const lowest30d = Math.round(marketAvg * 0.9);
+            
+            // Populate Results
+            avgPriceVal.textContent = marketAvg.toLocaleString() + " TL";
+            lowestPriceVal.textContent = lowest30d.toLocaleString() + " TL";
+
+            // Decision Logic
+            let verdict = "";
+            let color = "";
+            let desc = "";
+
+            if (price < marketAvg) {
+                verdict = "AL";
+                color = "bg-primary-container text-on-primary-container";
+                desc = "This price is below market average. Excellent value identified.";
+            } else if (price > marketAvg * 1.1) {
+                verdict = "ALMA";
+                color = "bg-error-container text-on-error-container";
+                desc = "Overpriced. We found significantly better deals elsewhere.";
+            } else {
+                verdict = "BEKLE";
+                color = "bg-surface-container-highest text-on-surface";
+                desc = "Price is average. Wait for a potential drop or check service quality.";
+            }
+
+            // Update Verdict UI
+            verdictPlaceholder.classList.add('hidden');
+            verdictResult.classList.remove('hidden');
+            verdictBadge.textContent = verdict;
+            verdictBadge.className = `px-10 py-4 rounded-xl text-5xl font-black mb-4 fade-in ${color}`;
+            verdictDesc.textContent = desc;
+            verdictDesc.classList.add('fade-in');
+
+            // Update Market Landscape
+            retailerGrid.classList.remove('opacity-50');
+            const prices = [
+                marketAvg * 1.05,
+                marketAvg * 0.98,
+                marketAvg,
+                marketAvg * 1.02
+            ];
+            
+            const retailerElements = document.querySelectorAll('.retailer-price');
+            const linkElements = document.querySelectorAll('.retailer-link');
+            const retailers = ["hepsiburada", "trendyol", "amazon.com.tr", "n11"];
+            const searchBase = [
+                "https://www.hepsiburada.com/ara?q=",
+                "https://www.trendyol.com/sr?q=",
+                "https://www.amazon.com.tr/s?k=",
+                "https://www.n11.com/arama?q="
+            ];
+
+            retailerElements.forEach((el, index) => {
+                el.textContent = Math.round(prices[index]).toLocaleString() + " TL";
+                el.classList.add('fade-in');
+            });
+
+            linkElements.forEach((el, index) => {
+                el.href = searchBase[index] + encodeURIComponent(currentFileName);
+            });
+
+            // Update AI Opinion
+            aiOpinionSection.classList.remove('opacity-50');
+            aiQuote.innerHTML = `"Based on my analysis of <b>${currentFileName}</b>, the entry price of ${price} TL is ${price < marketAvg ? 'favorable' : 'suboptimal'}. The volatility index for this category is currently low, suggesting these price points are stable. ${verdict === 'AL' ? 'Proceed with acquisition immediately.' : 'I recommend adding this to your tracker.'}"`;
+            aiQuote.classList.add('fade-in');
+            
+            // Reset Button
+            analyzeBtn.disabled = false;
+            btnText.textContent = "ANALYZE WITH AI";
+            btnLoader.classList.add('hidden');
+            systemStatus.textContent = "DECISION RENDERED";
+            systemStatus.classList.remove('animate-pulse');
+            systemStatus.classList.add('text-primary-fixed');
+
+        }, 2500);
+    });
+
+    // Reset functionality (Optional visual polish)
+    document.getElementById('refresh-landscape').addEventListener('click', () => {
+        if(analyzeBtn.disabled) return;
+        retailerGrid.classList.add('opacity-50');
+        setTimeout(() => {
+            if(priceInput.value) analyzeBtn.click();
+        }, 100);
+    });
+</script>
 </body></html>
