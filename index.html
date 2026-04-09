@@ -4,8 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AL MI? | Karar Mimarı</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">
-    function startAnalysis() {
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">function startAnalysis() {
         const productInput = document.getElementById('product-input').value.trim();
         const priceInputText = document.getElementById('price-input').value;
         const priceInput = parseFloat(priceInputText);
@@ -42,7 +41,7 @@
         
         for (let i = 0; i < pointsCount; i++) {
             const noise = (Math.random() - 0.48) * (basePrice * 0.04);
-            current = Math.max(basePrice * 0.7, current + noise); 
+            current = Math.max(basePrice * 0.7, current + noise);
             prices.push(current);
         }
 
@@ -137,10 +136,10 @@
         const verdictGlow = document.getElementById('verdict-glow');
         const verdictIcon = document.getElementById('verdict-icon');
 
-        if (userPrice > absoluteMarketMin * 1.05) {
+        if (userPrice > absoluteMarketMin * 1.02) {
             verdictTitle.innerText = "ALMA!";
             verdictTitle.className = "text-6xl font-black tracking-tighter text-secondary";
-            verdictDesc.innerHTML = `Bu ürün aslında piyasada <strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong>'ye bulunabiliyor. Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> fiyat çok yüksek!`;
+            verdictDesc.innerHTML = `Bu ürün piyasada <strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong> iken, sizin girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> fiyat çok yüksek.`;
             verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-tighter";
             verdictIcon.innerText = "dangerous";
             verdictIcon.className = "material-symbols-outlined text-[120px] text-secondary";
@@ -166,8 +165,7 @@
         document.getElementById('comparison-title').innerText = `${product.toUpperCase()} EN DÜŞÜK FİYATLAR`;
         document.getElementById('chart-product-title').innerText = `${product.toUpperCase()} GERÇEK FİYAT GEÇMİŞİ`;
         results.scrollIntoView({ behavior: 'smooth' });
-    }
-</script>
+    }</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -506,8 +504,7 @@
 </div>
 </div>
 </footer>
-<script>
-    function startAnalysis() {
+<script>function startAnalysis() {
         const productInput = document.getElementById('product-input').value.trim();
         const priceInputText = document.getElementById('price-input').value;
         const priceInput = parseFloat(priceInputText);
@@ -544,7 +541,7 @@
         
         for (let i = 0; i < pointsCount; i++) {
             const noise = (Math.random() - 0.48) * (basePrice * 0.04);
-            current = Math.max(basePrice * 0.7, current + noise); 
+            current = Math.max(basePrice * 0.7, current + noise);
             prices.push(current);
         }
 
@@ -639,10 +636,10 @@
         const verdictGlow = document.getElementById('verdict-glow');
         const verdictIcon = document.getElementById('verdict-icon');
 
-        if (userPrice > absoluteMarketMin * 1.05) {
+        if (userPrice > absoluteMarketMin * 1.02) {
             verdictTitle.innerText = "ALMA!";
             verdictTitle.className = "text-6xl font-black tracking-tighter text-secondary";
-            verdictDesc.innerHTML = `Bu ürün aslında piyasada <strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong>'ye bulunabiliyor. Girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> fiyat çok yüksek!`;
+            verdictDesc.innerHTML = `Bu ürün piyasada <strong>${Math.round(absoluteMarketMin).toLocaleString()} TL</strong> iken, sizin girdiğiniz <strong>${userPrice.toLocaleString()} TL</strong> fiyat çok yüksek.`;
             verdictBadge.className = "inline-flex items-center gap-2 px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-tighter";
             verdictIcon.innerText = "dangerous";
             verdictIcon.className = "material-symbols-outlined text-[120px] text-secondary";
@@ -668,6 +665,5 @@
         document.getElementById('comparison-title').innerText = `${product.toUpperCase()} EN DÜŞÜK FİYATLAR`;
         document.getElementById('chart-product-title').innerText = `${product.toUpperCase()} GERÇEK FİYAT GEÇMİŞİ`;
         results.scrollIntoView({ behavior: 'smooth' });
-    }
-</script>
+    }</script>
 </body></html>
