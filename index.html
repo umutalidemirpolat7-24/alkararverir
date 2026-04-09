@@ -7,7 +7,6 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -90,6 +89,18 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+        .loading-spinner {
+            border: 4px solid rgba(0, 255, 65, 0.1);
+            border-left-color: #00FF41;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        [hidden] { display: none !important; }
     </style>
 </head>
 <body class="bg-surface text-on-surface min-h-screen selection:bg-primary-container selection:text-on-primary-container">
@@ -118,49 +129,58 @@
 <div class="mb-8">
 <span class="font-label text-xs uppercase tracking-[0.15em] text-primary-fixed-dim mb-4 block">Alışverişin Yeni Dönemi</span>
 <h1 class="font-headline text-5xl md:text-7xl font-black tracking-[-0.04em] leading-[0.9] text-on-surface mb-6">
-                        Yapay Zeka <br/><span class="text-primary-container">Karar Verir.</span>
+                    Yapay Zeka <br/><span class="text-primary-container">Karar Verir.</span>
 </h1>
 <p class="font-body text-lg text-on-surface-variant max-w-lg leading-relaxed">
-                        Fiyat trendlerini, kullanıcı yorumlarını ve pazar verilerini anında analiz ederek size en mantıklı kararı sunuyoruz.
-                    </p>
+                    Fiyat trendlerini, kullanıcı yorumlarını ve pazar verilerini anında analiz ederek size en mantıklı kararı sunuyoruz.
+                </p>
 </div>
 <div class="space-y-6">
 <div class="group">
 <div class="bg-surface-container-lowest rounded-xl p-6 border-2 border-transparent focus-within:border-primary-fixed transition-all duration-300">
 <label class="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Ürün Kimliği</label>
-<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-xl font-medium placeholder:text-surface-container-highest" placeholder="Ürün Adı veya Anahtar Kelimeler (Örn: Adidas Terrex AX4)" type="text"/>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-xl font-medium placeholder:text-surface-container-highest" id="product-name" placeholder="Ürün Adı veya Anahtar Kelimeler (Örn: Adidas Terrex AX4)" type="text"/>
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 <div class="bg-surface-container-lowest rounded-xl p-6 border-2 border-transparent focus-within:border-primary-fixed transition-all duration-300">
 <label class="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Güncel Fiyat (TL)</label>
-<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-xl font-medium placeholder:text-surface-container-highest" placeholder="0.00" type="number"/>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-xl font-medium placeholder:text-surface-container-highest" id="product-price" placeholder="0.00" type="number"/>
 </div>
-<button class="bg-primary-container text-on-primary-container font-black tracking-tight rounded-xl px-8 py-6 text-xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-[0_0_40px_-10px_rgba(0,255,65,0.3)]">
-<span>YAPAY ZEKA İLE ANALİZ ET</span>
+<button class="bg-primary-container text-on-primary-container font-black tracking-tight rounded-xl px-8 py-6 text-xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-[0_0_40px_-10px_rgba(0,255,65,0.3)]" id="analyze-btn">
+<span>ANALİZ ET</span>
 <span class="material-symbols-outlined" data-icon="bolt" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bolt</span>
 </button>
 </div>
 </div>
 </div>
 <div class="lg:col-span-5">
-<div class="bg-surface-container-low rounded-xl border-4 border-dashed border-outline-variant p-8 aspect-square flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-surface-container-high transition-all duration-300 relative overflow-hidden">
-<div class="relative z-10">
+<div class="bg-surface-container-low rounded-xl border-4 border-dashed border-outline-variant p-8 aspect-square flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-surface-container-high transition-all duration-300 relative overflow-hidden" onclick="document.getElementById('file-upload').click()">
+<div class="relative z-10" id="upload-placeholder">
 <div class="bg-primary-container/10 p-6 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300">
 <span class="material-symbols-outlined text-primary-container text-5xl" data-icon="add_a_photo">add_a_photo</span>
 </div>
 <h3 class="font-headline font-bold text-xl mb-2">Ürün Fotoğrafı Yükle</h3>
 <p class="text-on-surface-variant text-sm">veya buraya sürükleyip bırakın</p>
 </div>
-<!-- Placeholder visual for potential thumbnail -->
-<div class="absolute inset-0 opacity-10">
-<img alt="Sport shoe preview" class="w-full h-full object-cover" data-alt="close-up of a high-end red athletic shoe floating in a dark professional studio setup with moody lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkVums01IgS1WaSAzvqo-l7b9eqGAMKTfLgUyGX_ABi7iiRex_WjoV3jOxGNP7gfKwl-NWuHPQKQd--2D7-eMuEEX_PPJxUYKJ4jp7NbflPQqdv9aI10j8skRF-mkKKrwygeQoihy-AM3L6uZMd2kdwl1g2myzVHWs0gFIbQcnxFfzzg_LgUwrUMjpj3IPMAU-g54IHVPA9VyVNPEzeSOSlLS93zG-JhFTrQGQbYmfCkuU8IDtBAJyyAjx7RDNhTwGMfU19oakN_Y0"/>
+<div class="absolute inset-0 hidden" id="image-preview-container">
+<img alt="Preview" class="w-full h-full object-cover" id="image-preview"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="text-white font-bold">Değiştirmek için tıklayın</span>
 </div>
+</div>
+<input accept="image/*" class="hidden" id="file-upload" onchange="handleFileUpload(event)" type="file"/>
 </div>
 </div>
 </section>
-<!-- Analiz Raporu Section (Simulated State) -->
-<section class="space-y-12 mb-24">
+<!-- Loading State -->
+<div class="hidden mb-24 py-20 flex flex-col items-center justify-center text-center" id="loading-state">
+<div class="loading-spinner mb-6"></div>
+<h3 class="font-headline text-2xl font-bold text-primary-container">Yapay Zeka Analiz Ediyor...</h3>
+<p class="text-on-surface-variant mt-2">Piyasa verileri, trendler ve yorumlar taranıyor.</p>
+</div>
+<!-- Analiz Raporu Section -->
+<section class="space-y-12 mb-24 hidden" id="analysis-results">
 <div class="flex items-center gap-4 mb-8">
 <div class="h-px flex-1 bg-outline-variant/30"></div>
 <h2 class="font-label text-sm uppercase tracking-[0.3em] text-on-surface-variant">Analiz Raporu</h2>
@@ -175,16 +195,16 @@
 </div>
 </div>
 <div class="mb-6 flex justify-center">
-<div class="w-32 h-32 rounded-full bg-primary-container flex items-center justify-center shadow-[0_0_60px_-15px_rgba(0,255,65,0.6)]">
-<span class="material-symbols-outlined text-on-primary-container text-6xl" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_60px_-15px_rgba(0,255,65,0.6)]" id="result-icon-bg">
+<span class="material-symbols-outlined text-6xl" id="result-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
 </div>
 </div>
-<h2 class="font-headline text-8xl font-black tracking-[-0.08em] text-primary-container mb-4">AL</h2>
+<h2 class="font-headline text-8xl font-black tracking-[-0.08em] mb-4" id="result-text">AL</h2>
 <div class="max-w-2xl mx-auto">
 <h4 class="font-headline font-bold text-2xl mb-4">Uzman Görüşü</h4>
-<p class="font-body text-lg text-on-surface-variant leading-relaxed">
-                        Bu ürün şu an piyasa ortalamasının %15 altında bir fiyata sahip. Son 6 aylık fiyat grafiği incelendiğinde, bu seviyenin dip nokta olduğu ve önümüzdeki haftalarda artış beklendiği görülmektedir.
-                    </p>
+<p class="font-body text-lg text-on-surface-variant leading-relaxed" id="result-description">
+                    Bu ürün şu an piyasa ortalamasının altında bir fiyata sahip. Verilerimiz bu ürün için şu anın en doğru zaman olduğunu gösteriyor.
+                </p>
 </div>
 </div>
 <!-- Bento Grid Stats -->
@@ -193,32 +213,32 @@
 <div class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 <div class="bg-surface-container-low p-6 rounded-xl border border-transparent hover:border-primary-container/30 transition-all">
 <div class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-4">Hepsiburada</div>
-<div class="text-2xl font-black mb-4">2.499 TL</div>
-<a class="w-full bg-surface-container-high py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-surface-bright transition-colors" href="https://shopping.google.com/search?q=adidas+terrex+ax4" target="_blank">
+<div class="text-2xl font-black mb-4"><span class="store-price-val">2.499</span> TL</div>
+<a class="w-full bg-surface-container-high py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-surface-bright transition-colors" href="#" id="link-hepsiburada" target="_blank">
 <span>Mağazaya Git</span>
 <span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
 </a>
 </div>
 <div class="bg-surface-container-low p-6 rounded-xl border border-transparent hover:border-primary-container/30 transition-all">
 <div class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-4">Trendyol</div>
-<div class="text-2xl font-black mb-4">2.550 TL</div>
-<a class="w-full bg-surface-container-high py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-surface-bright transition-colors" href="#">
+<div class="text-2xl font-black mb-4"><span class="store-price-val">2.550</span> TL</div>
+<a class="w-full bg-surface-container-high py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-surface-bright transition-colors" href="#" id="link-trendyol" target="_blank">
 <span>Mağazaya Git</span>
 <span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
 </a>
 </div>
 <div class="bg-surface-container-low p-6 rounded-xl border border-transparent hover:border-primary-container/30 transition-all">
 <div class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-4">Amazon.tr</div>
-<div class="text-2xl font-black mb-4 text-primary-container">2.390 TL</div>
-<a class="w-full bg-primary-container/10 text-primary-container py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-primary-container/20 transition-colors" href="#">
+<div class="text-2xl font-black mb-4 text-primary-container"><span class="store-price-val">2.390</span> TL</div>
+<a class="w-full bg-primary-container/10 text-primary-container py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-primary-container/20 transition-colors" href="#" id="link-amazon" target="_blank">
 <span>Mağazaya Git</span>
 <span class="material-symbols-outlined text-sm" data-icon="shopping_cart">shopping_cart</span>
 </a>
 </div>
 <div class="bg-surface-container-low p-6 rounded-xl border border-transparent hover:border-primary-container/30 transition-all">
 <div class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-4">N11</div>
-<div class="text-2xl font-black mb-4">2.600 TL</div>
-<a class="w-full bg-surface-container-high py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-surface-bright transition-colors" href="#">
+<div class="text-2xl font-black mb-4"><span class="store-price-val">2.600</span> TL</div>
+<a class="w-full bg-surface-container-high py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-surface-bright transition-colors" href="#" id="link-n11" target="_blank">
 <span>Mağazaya Git</span>
 <span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
 </a>
@@ -228,7 +248,7 @@
 <div class="bg-surface-container-low p-6 rounded-xl flex flex-col justify-between">
 <div>
 <div class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Fiyat Trendi</div>
-<div class="flex items-center gap-2 text-primary-container">
+<div class="flex items-center gap-2 text-primary-container" id="trend-indicator">
 <span class="material-symbols-outlined font-bold" data-icon="trending_down">trending_down</span>
 <span class="font-bold">Düşüşte</span>
 </div>
@@ -246,7 +266,7 @@
 <!-- Tüketici Bilinci Section -->
 <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
 <div class="relative rounded-xl overflow-hidden aspect-video lg:order-2">
-<img alt="Shopping Awareness" class="w-full h-full object-cover" data-alt="abstract artistic representation of digital shopping deals with glowing sales tags and data streams in a dark minimal space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn-2iXLi19zU3DYd9widXYNL4-TVo3KBT1g6fmw_56LGAh55UulnrLIjGgscAw-LY_AEcqO9dX7OZSrEjWZ6meapVmmWlWdF1oMCGKU5OQVWLLfvmEt58CEfoWtnLt83rpFai0_JvyMO4IDDcCghUdcprQ8TxYsw_pyLnBKLdftAK4N78wZMBIU8aICO0qRnDvu0KyRX8lFnOygY16Ejwlj75tpBC48nYTzIxtkkR1c1gS5nL_e_mRThOFKV0aCpgOsWzQxjpJmEBR"/>
+<img alt="Tüketici Bilinci" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn-2iXLi19zU3DYd9widXYNL4-TVo3KBT1g6fmw_56LGAh55UulnrLIjGgscAw-LY_AEcqO9dX7OZSrEjWZ6meapVmmWlWdF1oMCGKU5OQVWLLfvmEt58CEfoWtnLt83rpFai0_JvyMO4IDDcCghUdcprQ8TxYsw_pyLnBKLdftAK4N78wZMBIU8aICO0qRnDvu0KyRX8lFnOygY16Ejwlj75tpBC48nYTzIxtkkR1c1gS5nL_e_mRThOFKV0aCpgOsWzQxjpJmEBR"/>
 <div class="absolute inset-0 bg-gradient-to-t from-surface-dim to-transparent opacity-60"></div>
 </div>
 <div class="lg:order-1">
@@ -288,4 +308,108 @@
 </div>
 </div>
 </footer>
+<script>
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewImg = document.getElementById('image-preview');
+                const previewContainer = document.getElementById('image-preview-container');
+                const placeholder = document.getElementById('upload-placeholder');
+                
+                previewImg.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                
+                // Auto trigger analysis if product name is present
+                startAnalysis();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    const analyzeBtn = document.getElementById('analyze-btn');
+    analyzeBtn.addEventListener('click', startAnalysis);
+
+    function startAnalysis() {
+        const productName = document.getElementById('product-name').value.trim();
+        const productPrice = document.getElementById('product-price').value.trim();
+
+        // Show loading state
+        document.getElementById('analysis-results').classList.add('hidden');
+        document.getElementById('loading-state').classList.remove('hidden');
+        
+        // Scroll to loading
+        window.scrollTo({
+            top: document.getElementById('loading-state').offsetTop - 100,
+            behavior: 'smooth'
+        });
+
+        setTimeout(() => {
+            renderResults(productName, productPrice);
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('analysis-results').classList.remove('hidden');
+            
+            window.scrollTo({
+                top: document.getElementById('analysis-results').offsetTop - 100,
+                behavior: 'smooth'
+            });
+        }, 2500);
+    }
+
+    function renderResults(name, price) {
+        const resText = document.getElementById('result-text');
+        const resIcon = document.getElementById('result-icon');
+        const resIconBg = document.getElementById('result-icon-bg');
+        const resDesc = document.getElementById('result-description');
+        const trendInd = document.getElementById('trend-indicator');
+
+        // Logic for "Realistic Result"
+        // If price is high (e.g. > 5000), recommend BEKLE
+        // If price is suspiciously low (< 100), recommend ALMA (Scam/Quality warning)
+        // Default AL
+        
+        let decision = "AL";
+        let color = "text-primary-container";
+        let bgColor = "bg-primary-container";
+        let icon = "check_circle";
+        let description = `Bu ürün şu an piyasa ortalamasının %15 altında bir fiyata sahip. Son 6 aylık fiyat grafiği incelendiğinde, bu seviyenin dip nokta olduğu görülmektedir.`;
+
+        if (price > 5000) {
+            decision = "BEKLE";
+            color = "text-tertiary-fixed-dim";
+            bgColor = "bg-tertiary-fixed-dim";
+            icon = "schedule";
+            description = `Fiyat şu an zirve noktasında. Verilerimiz önümüzdeki 2 hafta içinde bir indirim dönemi başlayacağını öngörüyor. Sabırlı olmak size tasarruf ettirecektir.`;
+        } else if (price < 100 && price > 0) {
+            decision = "ALMA";
+            color = "text-secondary";
+            bgColor = "bg-secondary";
+            icon = "cancel";
+            description = `Fiyatın aşırı düşük olması şüpheli bir durumdur. Güvenilirlik analizi başarısız oldu veya ürün kalitesi beklentilerin altında kalabilir. Dikkatli olmanızı öneririz.`;
+        }
+
+        resText.innerText = decision;
+        resText.className = `font-headline text-8xl font-black tracking-[-0.08em] mb-4 ${color}`;
+        resIcon.innerText = icon;
+        resIcon.className = "material-symbols-outlined text-6xl text-on-primary-container";
+        resIconBg.className = `w-32 h-32 rounded-full flex items-center justify-center shadow-[0_0_60px_-15px_rgba(0,255,65,0.6)] ${bgColor}`;
+        resDesc.innerText = description;
+
+        // Update Links
+        const searchName = encodeURIComponent(name || "Ürün");
+        document.getElementById('link-hepsiburada').href = `https://www.hepsiburada.com/ara?q=${searchName}`;
+        document.getElementById('link-trendyol').href = `https://www.trendyol.com/sr?q=${searchName}`;
+        document.getElementById('link-amazon').href = `https://www.amazon.com.tr/s?k=${searchName}`;
+        document.getElementById('link-n11').href = `https://www.n11.com/arama?q=${searchName}`;
+
+        // Mock price variations
+        const basePrice = parseFloat(price) || 2500;
+        document.querySelectorAll('.store-price-val').forEach((el, index) => {
+            const variation = (Math.random() * 0.1 - 0.05) * basePrice;
+            el.innerText = Math.round(basePrice + variation).toLocaleString('tr-TR');
+        });
+    }
+</script>
 </body></html>
